@@ -49,4 +49,50 @@ class CategoryServiceTest {
         assertThat(nav).allSatisfy(node -> assertThat(node.children())
                 .allSatisfy(child -> assertThat(child.getParentId()).isEqualTo(node.category().getId())));
     }
+
+    @Test
+    void resolvesAllSecondLevelIdsWhenNoCategoryGiven() {
+        assertThat(categoryService.resolveProductCategoryIds(null, CategoryService.TYPE_ALL)).hasSize(10);
+    }
+
+    @Test
+    void resolvesTopLevelToBothChildren() {
+        assertThat(categoryService.resolveProductCategoryIds(1L, CategoryService.TYPE_ALL))
+                .containsExactly(101L, 102L);
+    }
+
+    @Test
+    void resolvesTopLevelWithPetsType() {
+        assertThat(categoryService.resolveProductCategoryIds(1L, CategoryService.TYPE_PETS))
+                .containsExactly(101L);
+    }
+
+    @Test
+    void resolvesTopLevelWithSuppliesType() {
+        assertThat(categoryService.resolveProductCategoryIds(1L, CategoryService.TYPE_SUPPLIES))
+                .containsExactly(102L);
+    }
+
+    @Test
+    void resolvesSecondLevelToItself() {
+        assertThat(categoryService.resolveProductCategoryIds(101L, CategoryService.TYPE_ALL))
+                .containsExactly(101L);
+    }
+
+    @Test
+    void resolvesPetsTypeAcrossAllTopLevels() {
+        assertThat(categoryService.resolveProductCategoryIds(null, CategoryService.TYPE_PETS)).hasSize(5);
+    }
+
+    @Test
+    void returnsEmptyForUnknownCategory() {
+        assertThat(categoryService.resolveProductCategoryIds(999L, CategoryService.TYPE_ALL)).isEmpty();
+    }
+
+    @Test
+    void normalizesUnknownProductTypeToAll() {
+        assertThat(CategoryService.normalizeProductType("whatever")).isEqualTo(CategoryService.TYPE_ALL);
+        assertThat(CategoryService.normalizeProductType(null)).isEqualTo(CategoryService.TYPE_ALL);
+        assertThat(CategoryService.normalizeProductType("pets")).isEqualTo(CategoryService.TYPE_PETS);
+    }
 }
