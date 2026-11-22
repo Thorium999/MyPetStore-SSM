@@ -1,21 +1,45 @@
 package org.csu.mypetstore.service;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import org.csu.mypetstore.entity.Product;
+import org.csu.mypetstore.mapper.ProductMapper;
 import org.springframework.stereotype.Service;
 
-/**
- * 商品业务。
- *
- * 待办（首页用）：
- * 1. 注入 ProductMapper
- * 2. getNewArrivals()：status='ON_SALE'，created_at DESC、id DESC，取 3 条
- * 3. getFeatured()：status='ON_SALE'，sort_order ASC、id ASC，取 4 条（人工指定前四，不做推荐算法）
- *
- * 待办（列表页 / 详情页用，后续）：
- * 4. 分页查询：categoryId（含其下二级）+ productType(ALL/PETS/SUPPLIES) + keyword + sort + page/pageSize
- * 5. 按 id 查详情，连同相册（ProductImageMapper，按 sort_order、id 升序）
- *
- * 注意：业务规则（只查 ON_SALE、条数上限）写在这一层，Controller 不许自己拼条件。
- */
+import java.util.List;
+
 @Service
 public class ProductService {
+
+    /** 前台只展示上架商品 */
+    private static final String ON_SALE = "ON_SALE";
+
+    /** 首页两个栏目的条数上限 */
+    private static final int NEW_ARRIVAL_LIMIT = 3;
+    private static final int FEATURED_LIMIT = 4;
+
+    private final ProductMapper productMapper;
+
+    public ProductService(ProductMapper productMapper) {
+        this.productMapper = productMapper;
+    }
+
+    /** 新品上架：最近创建的 3 件 */
+    public List<Product> getNewArrivals() {
+        return productMapper.selectList(
+                Wrappers.<Product>lambdaQuery()
+                        .eq(Product::getStatus, ON_SALE)
+                        .orderByDesc(Product::getCreatedAt)
+                        .orderByDesc(Product::getId)
+                        .last("LIMIT " + NEW_ARRIVAL_LIMIT));
+    }
+
+    /** 精选推荐：人工指定前 4 件，不做推荐算法 */
+    public List<Product> getFeatured() {
+        return productMapper.selectList(
+                Wrappers.<Product>lambdaQuery()
+                        .eq(Product::getStatus, ON_SALE)
+                        .orderByAsc(Product::getSortOrder)
+                        .orderByAsc(Product::getId)
+                        .last("LIMIT " + FEATURED_LIMIT));
+    }
 }
