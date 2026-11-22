@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: MyPetStore-SSM
+  # 不显式指定 --spring.profiles.active 时用 dev（本地开发）
+  profiles:
+    default: dev
