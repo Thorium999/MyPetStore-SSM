@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>MyPetStore | 环境自检</title>
+    <link rel="stylesheet" th:href="@{/css/jpetstore.css}"/>
+</head>
+<body class="account-page">
+<main class="mpa-shell">
+    <h1>Thymeleaf 渲染自检</h1>
+    <p>下面的内容由 Controller 放进 Model，再由模板渲染，说明服务端渲染链路已打通。</p>
+
+    <table class="def-table">
+        <tr>
+            <th>账号 ID</th>
+            <td th:text="${user.id}">1</td>
+        </tr>
+        <tr>
+            <th>登录名</th>
+            <td th:text="${user.username}">alice</td>
+        </tr>
+        <tr>
+            <th>显示名称</th>
+            <td th:text="${user.displayName}">林同学</td>
+        </tr>
+        <tr>
+            <th>角色</th>
+            <td th:text="${user.role}">CUSTOMER</td>
+        </tr>
+        <tr>
+            <th>状态</th>
+            <td th:text="${user.status}">ENABLED</td>
+        </tr>
+    </table>
+
+    <p><a th:href="@{/demo}">返回自检首页</a></p>
+</main>
+</body>
+</html>
