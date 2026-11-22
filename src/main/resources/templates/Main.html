@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>MyPetStore | 首页</title>
+    <link rel="stylesheet" th:href="@{/css/jpetstore.css}"/>
+</head>
+<!--
+  首页（原型 Main.html）。Model 里预期三个属性：
+    nav         List<CategoryNavigation>  分类导航（一级 + 其下二级）
+    newArrivals List<Product>             新品上架，最多 3 条
+    featured    List<Product>             精选推荐，最多 4 条
+  待办：照参考 UI 版式搬静态骨架，再把这三块换成 th:each 渲染。
+  必须删掉原型里的：本周热卖、宠物达人、为您推荐、Banner 管理入口。
+-->
+<body class="home-page">
+
+<!-- TODO: <div th:replace="~{fragments/layout :: siteHeader}"></div> -->
+<!-- TODO: Banner（静态图，本期不做管理） -->
+
+<!-- TODO: 分类导航：th:each="n : ${nav}"，一级标题链接 /category?categoryId=n.category.id，
+           其下 th:each="c : ${n.children}" 二级入口链接带自己的 id（101/102/201/202…） -->
+
+<!-- TODO: 新品上架：th:each="p : ${newArrivals}"，
+           封面 th:src="@{'/' + ${p.coverImage}}"、价格 th:text="'¥' + ${#numbers.formatDecimal(p.price,1,2)}" -->
+
+<!-- TODO: 精选推荐：同新品，数据取 ${featured} -->
+
+<!-- TODO: <div th:replace="~{fragments/layout :: siteFooter}"></div> -->
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>MyPetStore | 商品详情</title>
+    <link rel="stylesheet" th:href="@{/css/jpetstore.css}"/>
+</head>
+<!--
+  商品详情页（原型 Product.html）。Model 里预期：
+    product   单个 Product（一商品一 SKU）
+    images    List<ProductImage>（按 sort_order、id 升序；可能为空，空则只显示封面）
+    category  所属二级分类与其一级路径（面包屑用）
+  待办：封面 + 相册缩略图、SKU 与库存、价格、数量选择 1—99、加入购物车表单（POST /cart）。
+  必须删掉原型里的：多规格/服务方案/配送方式/收藏/你可能还喜欢/立即购买。
+-->
+<body class="product-page">
+
+<!-- TODO: <div th:replace="~{fragments/layout :: siteHeader}"></div> -->
+<!-- TODO: 面包屑：一级 → 二级 → 商品名 -->
+<!-- TODO: 左侧图：封面 th:src="@{'/' + ${product.coverImage}}"，相册 th:each="img : ${images}" -->
+<!-- TODO: 右侧信息：名称、价格、SKU、库存（0 时禁用加车并提示售罄） -->
+<!-- TODO: 加购表单：POST /cart，字段 productId、quantity(1—99)；未登录先跳 /signon -->
+
+</body>
+</html>

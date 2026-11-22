@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<!--
+  公共片段：在 Main / Category / Product 三页里用 th:replace 引入，避免头部尾部复制多份。
+  待办：把参考 UI 各页里重复的 <header>、<footer> 搬进来，参数化当前用户/购物车数量。
+  用法：<div th:replace="~{fragments/layout :: siteHeader}"></div>
+-->
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>fragments</title>
+</head>
+<body>
+
+<!-- TODO: th:fragment="siteHeader" —— 顶部条：登录/注册或用户名/退出、购物车(数量)、订单入口、搜索框 -->
+<!-- TODO: th:fragment="siteFooter" —— 版权与站内链接 -->
+
+</body>
+</html>

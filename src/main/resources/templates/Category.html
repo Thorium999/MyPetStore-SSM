@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>MyPetStore | 商品列表</title>
+    <link rel="stylesheet" th:href="@{/css/jpetstore.css}"/>
+</head>
+<!--
+  商品列表页（原型 Category.html）。Model 里预期：
+    nav          分类导航（左侧一级）
+    currentId    当前一级分类 id
+    productType  ALL / PETS / SUPPLIES（由二级分类推导，不是 product 字段）
+    sort         DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST
+    keyword      搜索词（≤120 字，名称包含匹配）
+    page         分页结果（records / current / pages / total；默认每页 6，范围 1—50）
+  待办：左侧一级导航 + 右侧类型按钮组 + 排序下拉 + 搜索框 + 商品网格 + 分页。
+  翻页链接必须带上当前全部筛选参数。
+-->
+<body class="catalog-page">
+
+<!-- TODO: <div th:replace="~{fragments/layout :: siteHeader}"></div> -->
+<!-- TODO: 左侧分类导航（一级）：链接 /category?categoryId=... -->
+<!-- TODO: 右侧筛选条：类型按钮 ALL/PETS/SUPPLIES、排序下拉、关键词搜索（GET /category） -->
+<!-- TODO: 商品网格：th:each="p : ${page.records}"，卡片链接 /product?id=${p.id}，库存 0 显示售罄 -->
+<!-- TODO: 分页：th:each 序号，链接保留 categoryId/productType/sort/keyword/pageSize -->
+<!-- TODO: 空态：th:if="${#lists.isEmpty(page.records)}" -->
+
+</body>
+</html>
