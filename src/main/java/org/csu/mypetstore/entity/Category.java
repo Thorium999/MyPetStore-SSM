@@ -17,20 +17,25 @@ import java.time.LocalDateTime;
 @TableName("category")
 public class Category {
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
+@TableId(type = IdType.AUTO)
+private Long id;
 
-    /** 全局唯一编码，创建后不改（DOGS / DOGS_PETS …） */
-    private String code;
+/**
+ * 全局唯一编码，创建后不改（DOGS / DOGS_PETS …）
+ */
+private String code;
 
-    /** 一级为 null，二级指向所属一级 */
-    private Long parentId;
+/**
+ * 一级为 null，二级指向所属一级
+ */
+private Long parentId;
 
-    private String name;
+private String name;
 
-    private Integer sortOrder;
+private Integer sortOrder;
 
-    private LocalDateTime createdAt;
+private LocalDateTime createdAt;
 
-    private LocalDateTime updatedAt;
+private LocalDateTime updatedAt;
+
 }

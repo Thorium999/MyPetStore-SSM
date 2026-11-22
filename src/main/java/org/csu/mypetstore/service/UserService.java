@@ -7,17 +7,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-@Service
-public class UserService {
+@Service public class UserService {
 
-    private final UserMapper userMapper;
+private final UserMapper userMapper;
 
-    public UserService(UserMapper userMapper) {
-        this.userMapper = userMapper;
-    }
+public UserService(UserMapper userMapper) {
+    this.userMapper = userMapper;
+}
 
-    public Optional<User> findByUsername(String username) {
-        return Optional.ofNullable(userMapper.selectOne(
-                Wrappers.<User>lambdaQuery().eq(User::getUsername, username)));
-    }
+public Optional<User> findByUsername(String username) {
+    return Optional.ofNullable(userMapper.selectOne(Wrappers.<User>lambdaQuery().eq(User::getUsername, username)));
+}
+
 }

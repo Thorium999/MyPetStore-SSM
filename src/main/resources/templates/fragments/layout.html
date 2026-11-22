@@ -1,18 +1,60 @@
 <!DOCTYPE html>
-<!--
-  公共片段：在 Main / Category / Product 三页里用 th:replace 引入，避免头部尾部复制多份。
-  待办：把参考 UI 各页里重复的 <header>、<footer> 搬进来，参数化当前用户/购物车数量。
-  用法：<div th:replace="~{fragments/layout :: siteHeader}"></div>
--->
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
-    <title>fragments</title>
+    <title>片段</title>
 </head>
 <body>
 
-<!-- TODO: th:fragment="siteHeader" —— 顶部条：登录/注册或用户名/退出、购物车(数量)、订单入口、搜索框 -->
-<!-- TODO: th:fragment="siteFooter" —— 版权与站内链接 -->
+<!-- 顶部：品牌 + 搜索 + 导航。登录/购物车/订单三处待对应模块实现后接真实 URL -->
+<header class="app-header" th:fragment="siteHeader">
+    <div class="wrap app-header__bar">
+        <a class="brand" th:href="@{/main}">
+            <img th:src="@{/images/logo.png}" alt="MyPetStore"/>
+            <span class="brand__name">MyPet<b>Store</b></span>
+        </a>
+
+        <form class="search" method="get" th:action="@{/category}">
+            <input type="text" name="keyword" maxlength="120" placeholder="搜索宠物、用品或 SKU"/>
+            <button type="submit">搜索</button>
+        </form>
+
+        <nav class="app-nav">
+            <a href="#">登录</a>
+            <a class="cart" href="#">购物车 <b>0</b></a>
+            <a href="#">我的订单</a>
+        </nav>
+    </div>
+</header>
+
+<footer class="app-footer" th:fragment="siteFooter">
+    <div class="wrap">
+        <span>MyPetStore · 课程教学演示项目，商品与价格均为虚构数据</span>
+        <span>
+            <a th:href="@{/main}">首页</a>
+            &nbsp;·&nbsp;
+            <a th:href="@{/category}">全部商品</a>
+        </span>
+    </div>
+</footer>
+
+<!-- 商品卡：首页两个栏目、列表页共用。参数是单个 Product -->
+<article class="card" th:fragment="productCard(p)">
+    <a class="card__media" th:href="@{/product(id=${p.id})}">
+        <img th:src="@{'/' + ${p.coverImage}}" th:alt="${p.name}"/>
+        <span class="card__badge" th:if="${p.stock == 0}">已售罄</span>
+    </a>
+    <div class="card__body">
+        <a class="card__name" th:href="@{/product(id=${p.id})}" th:text="${p.name}">商品名</a>
+        <span class="card__meta" th:text="${p.sku}">SKU</span>
+        <div class="card__foot">
+            <span class="price">
+                <small>¥</small><span th:text="${#numbers.formatDecimal(p.price, 1, 2)}">0.00</span>
+            </span>
+            <span class="stock" th:text="${p.stock > 0 ? '库存 ' + p.stock : '暂时无货'}">库存</span>
+        </div>
+    </div>
+</article>
 
 </body>
 </html>

@@ -17,38 +17,51 @@ import java.time.LocalDateTime;
 @TableName("product")
 public class Product {
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
+@TableId(type = IdType.AUTO)
+private Long id;
 
-    /** 唯一销售编码，创建后不改，仅用于展示 */
-    private String sku;
+/**
+ * 唯一销售编码，创建后不改，仅用于展示
+ */
+private String sku;
 
-    /** 必须指向二级分类 */
-    private Long categoryId;
+/**
+ * 必须指向二级分类
+ */
+private Long categoryId;
 
-    private String name;
+private String name;
 
-    private String summary;
+private String summary;
 
-    /** 纯文本详情，模板用 th:text 转义展示 */
-    private String description;
+/**
+ * 纯文本详情，模板用 th:text 转义展示
+ */
+private String description;
 
-    /** 站内相对路径，如 images/products/K9-BGL-03/1.jpg */
-    private String coverImage;
+/**
+ * 站内相对路径，如 images/products/K9-BGL-03/1.jpg
+ */
+private String coverImage;
 
-    private BigDecimal price;
+private BigDecimal price;
 
-    private Integer stock;
+private Integer stock;
 
-    /** DRAFT 下架 / ON_SALE 上架 */
-    private String status;
+/**
+ * DRAFT 下架 / ON_SALE 上架
+ */
+private String status;
 
-    private Integer sortOrder;
+private Integer sortOrder;
 
-    /** 乐观锁列，只读展示用不到，管理端写操作才用 */
-    private Long version;
+/**
+ * 乐观锁列，只读展示用不到，管理端写操作才用
+ */
+private Long version;
 
-    private LocalDateTime createdAt;
+private LocalDateTime createdAt;
 
-    private LocalDateTime updatedAt;
+private LocalDateTime updatedAt;
+
 }

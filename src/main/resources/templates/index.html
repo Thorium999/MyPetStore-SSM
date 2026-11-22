@@ -2,19 +2,18 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>MyPetStore</title>
-    <link rel="stylesheet" th:href="@{/css/jpetstore.css}"/>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
 </head>
-<!--
-  欢迎页（原型 index.html）。
-  待办：
-  1. 版式照 参考UI-解包/HTML/index.html 搬，去掉微信登录与“注册”暗示
-  2. 主按钮「先逛逛商城」链接到 /main
--->
-<body class="welcome-page">
+<body class="welcome">
 
-<!-- TODO: 品牌区（logo + 标语） -->
-<!-- TODO: 入口按钮 → th:href="@{/main}" -->
+<div class="welcome__box">
+    <img th:src="@{/images/logo.png}" alt="MyPetStore"/>
+    <h1>MyPetStore</h1>
+    <p>宠物与宠物用品的教学示例商城</p>
+    <a class="btn" th:href="@{/main}">先逛逛商城 →</a>
+</div>
 
 </body>
 </html>

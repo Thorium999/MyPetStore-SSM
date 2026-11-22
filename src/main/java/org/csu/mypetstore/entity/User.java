@@ -13,24 +13,25 @@ import java.time.LocalDateTime;
 @TableName("store_user")
 public class User {
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
+@TableId(type = IdType.AUTO)
+private Long id;
 
-    private String username;
+private String username;
 
-    private String passwordHash;
+private String passwordHash;
 
-    private String displayName;
+private String displayName;
 
-    private String role;
+private String role;
 
-    private String status;
+private String status;
 
-    private String email;
+private String email;
 
-    private String phone;
+private String phone;
 
-    private LocalDateTime createdAt;
+private LocalDateTime createdAt;
 
-    private LocalDateTime updatedAt;
+private LocalDateTime updatedAt;
+
 }

@@ -7,8 +7,8 @@ import org.csu.mypetstore.entity.User;
  */
 public record UserView(Long id, String username, String displayName, String role, String status) {
 
-    public static UserView of(User user) {
-        return new UserView(user.getId(), user.getUsername(), user.getDisplayName(),
-                user.getRole(), user.getStatus());
-    }
+public static UserView of(User user) {
+    return new UserView(user.getId(), user.getUsername(), user.getDisplayName(), user.getRole(), user.getStatus());
+}
+
 }

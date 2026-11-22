@@ -15,14 +15,15 @@ import lombok.Setter;
 @TableName("product_image")
 public class ProductImage {
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
+@TableId(type = IdType.AUTO)
+private Long id;
 
-    private Long productId;
+private Long productId;
 
-    private String imagePath;
+private String imagePath;
 
-    private String altText;
+private String altText;
 
-    private Integer sortOrder;
+private Integer sortOrder;
+
 }

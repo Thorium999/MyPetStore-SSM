@@ -2,31 +2,81 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>MyPetStore | 首页</title>
-    <link rel="stylesheet" th:href="@{/css/jpetstore.css}"/>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
 </head>
 <!--
-  首页（原型 Main.html）。Model 里预期三个属性：
-    nav         List<CategoryNavigation>  分类导航（一级 + 其下二级）
+  首页。Model 三个属性：
+    nav         List<CategoryNavigation>  5 个一级，各带 2 个二级
     newArrivals List<Product>             新品上架，最多 3 条
     featured    List<Product>             精选推荐，最多 4 条
-  待办：照参考 UI 版式搬静态骨架，再把这三块换成 th:each 渲染。
-  必须删掉原型里的：本周热卖、宠物达人、为您推荐、Banner 管理入口。
 -->
-<body class="home-page">
+<body>
 
-<!-- TODO: <div th:replace="~{fragments/layout :: siteHeader}"></div> -->
-<!-- TODO: Banner（静态图，本期不做管理） -->
+<div th:replace="~{fragments/layout :: siteHeader}"></div>
 
-<!-- TODO: 分类导航：th:each="n : ${nav}"，一级标题链接 /category?categoryId=n.category.id，
-           其下 th:each="c : ${n.children}" 二级入口链接带自己的 id（101/102/201/202…） -->
+<main class="page">
+    <div class="wrap">
 
-<!-- TODO: 新品上架：th:each="p : ${newArrivals}"，
-           封面 th:src="@{'/' + ${p.coverImage}}"、价格 th:text="'¥' + ${#numbers.formatDecimal(p.price,1,2)}" -->
+        <section class="hero">
+            <h1>给毛孩子挑点好的</h1>
+            <p>宠物与用品按大类分好，不用登录也能随便逛；加入购物车时才需要登录。</p>
+            <div class="hero__actions">
+                <a class="btn" th:href="@{/category}">开始选购 →</a>
+                <a class="btn btn--ghost" th:href="@{/category(productType='SUPPLIES')}">只看用品</a>
+            </div>
+        </section>
 
-<!-- TODO: 精选推荐：同新品，数据取 ${featured} -->
+        <section class="section">
+            <div class="section__head">
+                <h2>按分类选购</h2>
+                <span class="hint">5 个大类，每类下分「宠物」与「用品」</span>
+            </div>
+            <div class="cat-grid">
+                <div class="cat" th:each="n : ${nav}">
+                    <a class="cat__title" th:href="@{/category(categoryId=${n.category.id})}"
+                       th:text="${n.category.name}">犬类</a>
+                    <div class="cat__children">
+                        <a class="pill" th:each="c : ${n.children}"
+                           th:href="@{/category(categoryId=${c.id})}" th:text="${c.name}">宠物</a>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-<!-- TODO: <div th:replace="~{fragments/layout :: siteFooter}"></div> -->
+        <section class="section">
+            <div class="section__head">
+                <h2>新品上架</h2>
+                <span class="hint">最近上架的 3 件</span>
+                <a class="more" th:href="@{/category(sort='NEWEST')}">查看全部 →</a>
+            </div>
+            <div class="shelf shelf--three" th:if="${not #lists.isEmpty(newArrivals)}">
+                <th:block th:each="p : ${newArrivals}">
+                    <article th:replace="~{fragments/layout :: productCard(${p})}"></article>
+                </th:block>
+            </div>
+            <p class="empty" th:if="${#lists.isEmpty(newArrivals)}">暂无上架商品</p>
+        </section>
+
+        <section class="section">
+            <div class="section__head">
+                <h2>精选推荐</h2>
+                <span class="hint">编辑人工挑选的 4 件</span>
+                <a class="more" th:href="@{/category}">查看全部 →</a>
+            </div>
+            <div class="shelf" th:if="${not #lists.isEmpty(featured)}">
+                <th:block th:each="p : ${featured}">
+                    <article th:replace="~{fragments/layout :: productCard(${p})}"></article>
+                </th:block>
+            </div>
+            <p class="empty" th:if="${#lists.isEmpty(featured)}">暂无推荐商品</p>
+        </section>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: siteFooter}"></div>
 
 </body>
 </html>
