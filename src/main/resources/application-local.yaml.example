@@ -1,0 +1,5 @@
+# 复制本文件为 application-local.yaml（同目录），填入自己的数据库密码。
+# application-local.yaml 已被 .gitignore 忽略，不会提交。
+spring:
+  datasource:
+    password: 你的MySQL密码

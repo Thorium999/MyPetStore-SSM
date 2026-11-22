@@ -4,6 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### 本机私有配置（数据库密码等），不要提交 ###
+src/main/resources/application-local.yaml
+
 ### STS ###
 .apt_generated
 .classpath

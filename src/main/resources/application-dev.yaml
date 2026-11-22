@@ -1,10 +1,12 @@
 spring:
+  config:
+    # 本机私有配置（数据库密码等），文件不进 git；缺失时用环境变量 MYSQL_PASSWORD
+    import: optional:classpath:application-local.yaml
   datasource:
     # 库名与 01/02 脚本一致：MyPetStore
     url: jdbc:mysql://localhost:3306/MyPetStore?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    # 本机 MySQL 密码：改这里，或设环境变量 MYSQL_PASSWORD（推荐，避免密码进 git）
-    password: ${MYSQL_PASSWORD:root}
+    password: ${MYSQL_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
     init:
