@@ -1,0 +1,88 @@
+package org.csu.mypetstore.controller;
+
+import org.csu.mypetstore.session.LoginSession;
+import org.csu.mypetstore.session.LoginUser;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+/**
+ * 购物车的 HTTP 层：未登录拦截、加购意图暂存、登录后正常渲染。
+ */
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+class CartControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    void cartPageRequiresLogin() throws Exception {
+        mockMvc.perform(get("/cart"))
+               .andExpect(status().is3xxRedirection())
+               .andExpect(redirectedUrl("/signon?returnUrl=%2Fcart"));
+    }
+
+    @Test
+    void addToCartWhileLoggedOutRemembersIntent() throws Exception {
+        MvcResult result = mockMvc.perform(post("/cart")
+                                                   .param("productId", "22")
+                                                   .param("quantity", "2"))
+                                  .andExpect(status().is3xxRedirection())
+                                  .andExpect(redirectedUrl("/signon?returnUrl=%2Fproduct%3Fid%3D22"))
+                                  .andReturn();
+
+        Object pending = result.getRequest().getSession().getAttribute("pendingCartAdd");
+        assertThat(pending).isNotNull();
+    }
+
+    @Test
+    void loggedInUserSeesCartWithIssues() throws Exception {
+        mockMvc.perform(get("/cart").session(aliceSession()))
+               .andExpect(status().isOk())
+               .andExpect(content().string(containsString("购物车")))
+               .andExpect(content().string(containsString("已下架")))
+               .andExpect(content().string(containsString("已售罄")));
+    }
+
+    @Test
+    void loggedInAddRedirectsToCartWithNotice() throws Exception {
+        mockMvc.perform(post("/cart")
+                                .session(aliceSession())
+                                .param("productId", "22")
+                                .param("quantity", "1"))
+               .andExpect(status().is3xxRedirection())
+               .andExpect(redirectedUrl("/cart"))
+               .andExpect(flash().attributeExists("notice"));
+    }
+
+    @Test
+    void updateAndDeleteRequireLogin() throws Exception {
+        mockMvc.perform(post("/cart/1/quantity").param("quantity", "2"))
+               .andExpect(redirectedUrl("/signon?returnUrl=%2Fcart%2F1%2Fquantity"));
+
+        mockMvc.perform(post("/cart/1/delete"))
+               .andExpect(redirectedUrl("/signon?returnUrl=%2Fcart%2F1%2Fdelete"));
+    }
+
+    private MockHttpSession aliceSession() {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(LoginSession.KEY, new LoginUser(1L, "alice", "林同学", "CUSTOMER"));
+        return session;
+    }
+}

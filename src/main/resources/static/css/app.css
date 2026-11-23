@@ -815,6 +815,153 @@ img {
     color: var(--ink);
 }
 
+/* ---------- 购物车 ---------- */
+
+.notice {
+    margin: 0 0 18px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    border: 1px solid #bfe0da;
+    color: #0b5f59;
+    font-size: 14px;
+}
+
+.cart {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.cart__head,
+.cart__row {
+    display: grid;
+    grid-template-columns: minmax(0, 2.4fr) 110px 170px 120px 70px;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+}
+
+.cart__head {
+    font-size: 13px;
+    color: var(--muted);
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+}
+
+.cart__row {
+    border-bottom: 1px solid var(--line);
+}
+
+.cart__row:last-of-type {
+    border-bottom: 0;
+}
+
+.cart__row.is-blocked {
+    background: #fdf6f5;
+}
+
+.cart__product {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.cart__product img {
+    width: 64px;
+    height: 64px;
+    flex: 0 0 auto;
+    border-radius: 10px;
+    object-fit: cover;
+    background: #efece5;
+}
+
+.cart__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.cart__price,
+.cart__subtotal {
+    font-size: 15px;
+    color: var(--warm);
+    white-space: nowrap;
+}
+
+.cart__price small,
+.cart__subtotal small {
+    font-size: 11px;
+    margin-right: 1px;
+}
+
+.cart__qty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cart__qty .qty__input {
+    width: 64px;
+    padding: 7px 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+
+.btn--sm {
+    padding: 7px 14px;
+    font-size: 13px;
+}
+
+.linkish {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.linkish:hover {
+    color: #a32d2d;
+}
+
+.tag {
+    align-self: flex-start;
+    padding: 1px 9px;
+    border-radius: 999px;
+    background: #fdeceb;
+    border: 1px solid #f3c9c6;
+    color: #a32d2d;
+    font-size: 12px;
+}
+
+.cart__foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 18px;
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+}
+
+.cart__total {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.cart__total .price--lg {
+    margin: 0;
+    font-size: 24px;
+}
+
 /* ---------- 页脚 ---------- */
 
 .app-footer {
@@ -963,5 +1110,34 @@ img {
     .shelf,
     .shelf--three {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cart__head {
+        display: none;
+    }
+
+    .cart__row {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px 12px;
+    }
+
+    .cart__product {
+        grid-column: 1 / -1;
+    }
+
+    /* 窄屏没有表头，用伪元素补上单位标签 */
+    .cart__price::before,
+    .cart__subtotal::before {
+        margin-right: 6px;
+        font-size: 12px;
+        color: var(--muted);
+    }
+
+    .cart__price::before {
+        content: "单价";
+    }
+
+    .cart__subtotal::before {
+        content: "小计";
     }
 }

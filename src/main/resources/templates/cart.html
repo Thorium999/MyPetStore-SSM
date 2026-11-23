@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>购物车 | MyPetStore</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<!--
+  购物车。Model：cart（CartSnapshot：lines / itemCount / totalAmount）
+  notice 来自重定向的 Flash 属性（加购、改数量、删除的结果提示）
+-->
+<body>
+
+<div th:replace="~{fragments/layout :: siteHeader}"></div>
+
+<main class="page">
+    <div class="wrap">
+
+        <div class="content__head">
+            <h1>购物车</h1>
+            <span class="hint" th:if="${!cart.isEmpty()}"
+                  th:text="'共 ' + ${cart.itemCount} + ' 件'">共 0 件</span>
+        </div>
+
+        <p class="notice" th:if="${notice}" th:text="${notice}">已加入购物车</p>
+
+        <div class="empty" th:if="${cart.isEmpty()}">
+            购物车还是空的，<a th:href="@{/category}">去挑点东西</a>
+        </div>
+
+        <div class="cart" th:unless="${cart.isEmpty()}">
+            <div class="cart__head">
+                <span>商品</span>
+                <span>单价</span>
+                <span>数量</span>
+                <span>小计</span>
+                <span></span>
+            </div>
+
+            <div class="cart__row" th:each="line : ${cart.lines}"
+                 th:classappend="${line.purchasable()} ? '' : 'is-blocked'">
+                <div class="cart__product">
+                    <img th:src="@{'/' + ${line.coverImage}}" th:alt="${line.name}"/>
+                    <div class="cart__meta">
+                        <a th:href="@{/product(id=${line.productId})}" th:text="${line.name}">商品名</a>
+                        <span class="card__meta" th:text="${line.sku}">SKU</span>
+                        <span class="tag" th:if="${!line.purchasable()}" th:text="${line.issue}">已下架</span>
+                    </div>
+                </div>
+
+                <div class="cart__price">
+                    <small>¥</small><span th:text="${#numbers.formatDecimal(line.price, 1, 2)}">0.00</span>
+                </div>
+
+                <form class="cart__qty" method="post"
+                      th:action="@{/cart/{id}/quantity(id=${line.itemId})}">
+                    <label class="sr-only" th:for="'qty-' + ${line.itemId}"
+                           th:text="|${line.name} 的数量|">数量</label>
+                    <input class="qty__input" type="number" name="quantity" step="1" inputmode="numeric"
+                           th:id="'qty-' + ${line.itemId}"
+                           th:value="${line.quantity}" min="1"
+                           th:max="${line.stock > 0 ? line.stock : 1}"/>
+                    <button class="btn btn--sm" type="submit">更新</button>
+                </form>
+
+                <div class="cart__subtotal">
+                    <small>¥</small><span th:text="${#numbers.formatDecimal(line.subtotal, 1, 2)}">0.00</span>
+                </div>
+
+                <form method="post" th:action="@{/cart/{id}/delete(id=${line.itemId})}">
+                    <button class="linkish" type="submit">删除</button>
+                </form>
+            </div>
+
+            <div class="cart__foot">
+                <span class="hint" th:if="${cart.hasBlockedLine()}">标出的条目暂不可结算，请先删除或等待补货</span>
+                <div class="cart__total">
+                    <span class="hint">可结算合计</span>
+                    <span class="price price--lg">
+                        <small>¥</small><span
+                            th:text="${#numbers.formatDecimal(cart.totalAmount, 1, 2)}">0.00</span>
+                    </span>
+                </div>
+                <button class="btn" type="button" disabled title="结算与下单模块开发中">去结算</button>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: siteFooter}"></div>
+
+</body>
+</html>

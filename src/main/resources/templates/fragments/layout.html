@@ -30,7 +30,7 @@
                   th:if="${session.loginUser != null}">
                 <button type="submit">退出</button>
             </form>
-            <a class="cart" href="#">购物车 <b>0</b></a>
+            <a class="cart" th:href="@{/cart}">购物车 <b th:text="${cartCount}">0</b></a>
             <a href="#">我的订单</a>
         </nav>
     </div>
