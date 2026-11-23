@@ -369,6 +369,45 @@ img {
 
 /* ---------- 列表页 ---------- */
 
+.catalog {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 28px;
+}
+
+.rail {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-self: start;
+    position: sticky;
+    top: 88px;
+}
+
+.rail__all,
+.rail__item {
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.rail__all {
+    margin-bottom: 4px;
+    font-weight: 600;
+    background: var(--surface);
+    border: 1px solid var(--line);
+}
+
+.rail a:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.rail a.is-active {
+    background: var(--accent);
+    color: #fff;
+}
+
 .content__head {
     display: flex;
     align-items: baseline;
@@ -401,24 +440,8 @@ img {
     border-radius: var(--radius);
 }
 
-.tools__filters {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
 
-.tools__row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
 
-.tools__label {
-    width: 32px;
-    flex: 0 0 auto;
-    font-size: 13px;
-    color: var(--muted);
-}
 
 .chips {
     display: flex;
@@ -738,6 +761,22 @@ img {
 
     .shelf {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .catalog {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    .rail {
+        position: static;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .rail__all {
+        margin-bottom: 0;
     }
 
     .detail {
