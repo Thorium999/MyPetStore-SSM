@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>登录 | MyPetStore</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: siteHeader}"></div>
+
+<main class="page">
+    <div class="wrap">
+        <div class="auth">
+            <h1>登录</h1>
+            <p class="auth__lead">登录后才能加入购物车、结算下单。</p>
+
+            <p class="alert" th:if="${error}" th:text="${error}">用户名或密码错误</p>
+
+            <form class="auth__form" method="post" th:action="@{/signon}">
+                <input type="hidden" name="returnUrl" th:if="${returnUrl}" th:value="${returnUrl}"/>
+
+                <label class="field">
+                    <span>用户名</span>
+                    <input type="text" name="username" th:value="${username}"
+                           required maxlength="30" autocomplete="username" autofocus/>
+                </label>
+
+                <label class="field">
+                    <span>密码</span>
+                    <input type="password" name="password" required maxlength="64"
+                           autocomplete="current-password"/>
+                </label>
+
+                <button class="btn" type="submit">登录</button>
+            </form>
+
+            <p class="auth__hint">
+                教学账号：<b>alice</b> / <b>bob</b>（顾客）、<b>admin</b>（管理员），密码均为
+                <b>PetStore123!</b>；<b>disabled</b> 是禁用账号，可用来验证拒绝登录。
+            </p>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: siteFooter}"></div>
+
+</body>
+</html>
