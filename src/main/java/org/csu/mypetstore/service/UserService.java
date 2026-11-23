@@ -16,7 +16,8 @@ public UserService(UserMapper userMapper) {
 }
 
 public Optional<User> findByUsername(String username) {
-    return Optional.ofNullable(userMapper.selectOne(Wrappers.<User>lambdaQuery().eq(User::getUsername, username)));
+    return Optional.ofNullable(userMapper.selectOne(Wrappers.<User>lambdaQuery()
+                                                            .eq(User::getUsername, username)));
 }
 
 }

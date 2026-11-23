@@ -15,7 +15,9 @@ import java.util.stream.Collectors;
 @Service
 public class CategoryService {
 
-/** 列表页的类型入口。类型不是 product 字段，由二级分类的编码后缀推导 */
+/**
+ * 列表页的类型入口。类型不是 product 字段，由二级分类的编码后缀推导
+ */
 public static final String TYPE_ALL = "ALL";
 public static final String TYPE_PETS = "PETS";
 public static final String TYPE_SUPPLIES = "SUPPLIES";
@@ -35,17 +37,16 @@ public CategoryService(CategoryMapper categoryMapper) {
  */
 public List<CategoryNavigation> getNavigation() {
     List<Category> all = selectAllOrdered();
-
+    
     Map<Long, List<Category>> childrenByParent = all.stream()
                                                     .filter(category -> category.getParentId() != null)
                                                     .collect(Collectors.groupingBy(
                                                             Category::getParentId, LinkedHashMap::new, Collectors.toList()));
-
+    
     return all.stream()
               .filter(category -> category.getParentId() == null)
               .map(top -> new CategoryNavigation(
-                      top,
-                      childrenByParent.getOrDefault(top.getId(), List.of())))
+                      top, childrenByParent.getOrDefault(top.getId(), List.of())))
               .toList();
 }
 
@@ -57,23 +58,22 @@ public List<CategoryNavigation> getNavigation() {
 public List<Long> resolveProductCategoryIds(Long categoryId, String productType) {
     List<Category> all = selectAllOrdered();
     String type = normalizeProductType(productType);
-
+    
     List<Category> candidates;
-    if (categoryId == null) {
+    if (categoryId == null)
         candidates = all.stream().filter(category -> category.getParentId() != null).toList();
-    } else {
+    else {
         Category target = all.stream()
                              .filter(category -> category.getId().equals(categoryId))
                              .findFirst()
                              .orElse(null);
-        if (target == null) {
+        if (target == null)
             return List.of();
-        }
         candidates = target.getParentId() != null
                      ? List.of(target)
                      : all.stream().filter(category -> categoryId.equals(category.getParentId())).toList();
     }
-
+    
     return candidates.stream()
                      .filter(category -> matchesType(category, type))
                      .map(Category::getId)
@@ -85,27 +85,24 @@ public Optional<Category> findById(Long categoryId) {
 }
 
 public static String normalizeProductType(String raw) {
-    if (TYPE_PETS.equalsIgnoreCase(raw)) {
+    if (TYPE_PETS.equalsIgnoreCase(raw))
         return TYPE_PETS;
-    }
-    if (TYPE_SUPPLIES.equalsIgnoreCase(raw)) {
+    if (TYPE_SUPPLIES.equalsIgnoreCase(raw))
         return TYPE_SUPPLIES;
-    }
     return TYPE_ALL;
 }
 
-/** 由二级分类的编码后缀判断它属于宠物还是用品；一级或未知返回 ALL。 */
+/**
+ * 由二级分类的编码后缀判断它属于宠物还是用品；一级或未知返回 ALL。
+ */
 public static String typeOf(Category category) {
-    if (category == null || category.getCode() == null) {
+    if (category == null || category.getCode() == null)
         return TYPE_ALL;
-    }
     String code = category.getCode();
-    if (code.endsWith(CODE_SUFFIX_SUPPLIES)) {
+    if (code.endsWith(CODE_SUFFIX_SUPPLIES))
         return TYPE_SUPPLIES;
-    }
-    if (code.endsWith(CODE_SUFFIX_PETS)) {
+    if (code.endsWith(CODE_SUFFIX_PETS))
         return TYPE_PETS;
-    }
     return TYPE_ALL;
 }
 

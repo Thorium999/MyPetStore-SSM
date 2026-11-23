@@ -9,13 +9,14 @@ import java.io.Serializable;
  */
 public record LoginUser(Long id, String username, String displayName, String role) implements Serializable {
 
-    public static final String ROLE_ADMIN = "ADMIN";
+public static final String ROLE_ADMIN = "ADMIN";
 
-    public static LoginUser from(User user) {
-        return new LoginUser(user.getId(), user.getUsername(), user.getDisplayName(), user.getRole());
-    }
+public static LoginUser from(User user) {
+    return new LoginUser(user.getId(), user.getUsername(), user.getDisplayName(), user.getRole());
+}
 
-    public boolean isAdmin() {
-        return ROLE_ADMIN.equals(role);
-    }
+public boolean isAdmin() {
+    return ROLE_ADMIN.equals(role);
+}
+
 }

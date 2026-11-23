@@ -53,23 +53,23 @@ public String productList(@RequestParam(required = false) Long categoryId,
                           Model model) {
     String type = CategoryService.normalizeProductType(productType);
     String appliedSort = ProductService.normalizeSort(sort);
-
+    
     // 页面状态统一成「一级分类 + 类型」：从首页点二级进来（如 101）时，
     // 折算成 犬类 + 宠物，这样筛选按钮的选中态和 URL 都能对上。
     Category selected = categoryService.findById(categoryId).orElse(null);
     Long activeTopId = null;
     if (selected != null) {
-        if (selected.getParentId() == null) {
+        if (selected.getParentId() == null)
             activeTopId = selected.getId();
-        } else {
+        else {
             activeTopId = selected.getParentId();
             type = CategoryService.typeOf(selected);
         }
     }
-
+    
     List<Long> categoryIds = categoryService.resolveProductCategoryIds(activeTopId, type);
     Page<Product> result = productService.search(categoryIds, appliedSort, keyword, page, pageSize);
-
+    
     model.addAttribute("nav", categoryService.getNavigation());
     model.addAttribute("page", result);
     model.addAttribute("activeTopId", activeTopId);
@@ -85,20 +85,20 @@ public String productList(@RequestParam(required = false) Long categoryId,
 public String productDetail(@RequestParam Long id, Model model) {
     Product product = productService.findOnSaleById(id)
                                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "商品不存在或已下架"));
-
+    
     Category category = categoryService.findById(product.getCategoryId()).orElse(null);
-    Category parent = (category != null && category.getParentId() != null)
-                      ? categoryService.findById(category.getParentId()).orElse(null)
-                      : null;
-
+    Category parent = (category != null && category.getParentId() != null) ?
+                      categoryService.findById(category.getParentId()).orElse(null) : null;
+    
     int stock = product.getStock() == null ? 0 : product.getStock();
-
+    
     model.addAttribute("product", product);
     model.addAttribute("images", productService.getImages(product.getId()));
     model.addAttribute("category", category);
     model.addAttribute("parentCategory", parent);
     model.addAttribute("soldOut", stock == 0);
-    model.addAttribute("maxQuantity", Math.min(stock, ProductService.MAX_QUANTITY));
+    // 至少留 1 个选项：售罄时下拉被禁用，但不会出现空 select
+    model.addAttribute("maxQuantity", Math.max(1, Math.min(stock, ProductService.MAX_QUANTITY)));
     return "Product";
 }
 

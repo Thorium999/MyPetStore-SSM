@@ -52,12 +52,15 @@
                     <form class="tools__form" method="get" th:action="@{/category}">
                         <input type="hidden" name="productType" th:value="${productType}"/>
                         <input type="hidden" name="pageSize" th:value="${pageSize}"/>
-                        <input type="hidden" name="categoryId" th:if="${activeTopId != null}" th:value="${activeTopId}"/>
+                        <input type="hidden" name="categoryId" th:if="${activeTopId != null}"
+                               th:value="${activeTopId}"/>
 
-                        <input class="tools__input" type="text" name="keyword" maxlength="120"
-                               th:value="${keyword}" placeholder="搜索商品名称"/>
+                        <label class="sr-only" for="listKeyword">搜索商品名称</label>
+                        <input id="listKeyword" class="tools__input" type="text" name="keyword"
+                               maxlength="120" th:value="${keyword}" placeholder="搜索商品名称"/>
 
-                        <select class="tools__select" name="sort" onchange="this.form.submit()">
+                        <label class="sr-only" for="listSort">排序方式</label>
+                        <select id="listSort" class="tools__select" name="sort" onchange="this.form.submit()">
                             <option value="DEFAULT" th:selected="${sort == 'DEFAULT'}">默认排序</option>
                             <option value="PRICE_ASC" th:selected="${sort == 'PRICE_ASC'}">价格从低到高</option>
                             <option value="PRICE_DESC" th:selected="${sort == 'PRICE_DESC'}">价格从高到低</option>

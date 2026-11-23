@@ -15,7 +15,9 @@
         </a>
 
         <form class="search" method="get" th:action="@{/category}">
-            <input type="text" name="keyword" maxlength="120" placeholder="搜索宠物、用品或 SKU"/>
+            <label class="sr-only" for="siteKeyword">搜索商品</label>
+            <input id="siteKeyword" type="text" name="keyword" maxlength="120"
+                   placeholder="搜索宠物、用品或 SKU"/>
             <button type="submit">搜索</button>
         </form>
 

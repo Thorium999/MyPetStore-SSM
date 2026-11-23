@@ -72,7 +72,7 @@
                     <label class="buy__qty">
                         数量
                         <select name="quantity" th:disabled="${soldOut}">
-                            <option th:each="i : ${#numbers.sequence(1, soldOut ? 1 : maxQuantity)}"
+                            <option th:each="i : ${#numbers.sequence(1, maxQuantity)}"
                                     th:value="${i}" th:text="${i}">1</option>
                         </select>
                     </label>

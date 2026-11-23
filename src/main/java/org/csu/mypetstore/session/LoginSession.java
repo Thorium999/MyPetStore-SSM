@@ -8,24 +8,25 @@ import jakarta.servlet.http.HttpSession;
  */
 public final class LoginSession {
 
-    public static final String KEY = "loginUser";
+public static final String KEY = "loginUser";
 
-    private LoginSession() {
-    }
+private LoginSession() {
+}
 
-    public static void set(HttpSession session, LoginUser user) {
-        session.setAttribute(KEY, user);
-    }
+public static void set(HttpSession session, LoginUser user) {
+    session.setAttribute(KEY, user);
+}
 
-    public static LoginUser get(HttpSession session) {
-        return (LoginUser) session.getAttribute(KEY);
-    }
+public static LoginUser get(HttpSession session) {
+    return (LoginUser) session.getAttribute(KEY);
+}
 
-    public static boolean isLoggedIn(HttpSession session) {
-        return get(session) != null;
-    }
+public static boolean isLoggedIn(HttpSession session) {
+    return get(session) != null;
+}
 
-    public static void clear(HttpSession session) {
-        session.removeAttribute(KEY);
-    }
+public static void clear(HttpSession session) {
+    session.removeAttribute(KEY);
+}
+
 }

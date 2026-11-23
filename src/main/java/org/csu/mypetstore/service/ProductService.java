@@ -15,23 +15,33 @@ import java.util.Optional;
 @Service
 public class ProductService {
 
-/** 前台只展示上架商品 */
+/**
+ * 前台只展示上架商品
+ */
 public static final String STATUS_ON_SALE = "ON_SALE";
 
-/** 列表页排序方式 */
+/**
+ * 列表页排序方式
+ */
 public static final String SORT_DEFAULT = "DEFAULT";
 public static final String SORT_PRICE_ASC = "PRICE_ASC";
 public static final String SORT_PRICE_DESC = "PRICE_DESC";
 public static final String SORT_NEWEST = "NEWEST";
 
-/** 列表页每页条数：默认 6，允许 1—50 */
+/**
+ * 列表页每页条数：默认 6，允许 1—50
+ */
 public static final int DEFAULT_PAGE_SIZE = 6;
 public static final int MAX_PAGE_SIZE = 50;
 
-/** 单次购买数量上限（PRD：1—99） */
+/**
+ * 单次购买数量上限（PRD：1—99）
+ */
 public static final int MAX_QUANTITY = 99;
 
-/** 首页两个栏目的条数上限 */
+/**
+ * 首页两个栏目的条数上限
+ */
 private static final int NEW_ARRIVAL_LIMIT = 3;
 private static final int FEATURED_LIMIT = 4;
 
@@ -73,27 +83,24 @@ public List<Product> getFeatured() {
  */
 public Page<Product> search(List<Long> categoryIds, String sort, String keyword, long page, long pageSize) {
     long safePage = Math.max(page, 1);
-    long safePageSize = pageSize <= 0
-                        ? DEFAULT_PAGE_SIZE
-                        : Math.min(pageSize, MAX_PAGE_SIZE);
+    long safePageSize = pageSize <= 0 ? DEFAULT_PAGE_SIZE :
+                        Math.min(pageSize, MAX_PAGE_SIZE);
     Page<Product> pageRequest = new Page<>(safePage, safePageSize);
-
+    
     if (categoryIds != null && categoryIds.isEmpty()) {
         pageRequest.setRecords(List.of());
         pageRequest.setTotal(0);
         return pageRequest;
     }
-
+    
     LambdaQueryWrapper<Product> query = Wrappers.<Product>lambdaQuery()
                                                 .eq(Product::getStatus, STATUS_ON_SALE);
-    if (categoryIds != null) {
+    if (categoryIds != null)
         query.in(Product::getCategoryId, categoryIds);
-    }
-    if (keyword != null && !keyword.isBlank()) {
+    if (keyword != null && !keyword.isBlank())
         query.like(Product::getName, keyword.trim());
-    }
+    
     applySort(query, sort);
-
     return productMapper.selectPage(pageRequest, query);
 }
 
@@ -102,13 +109,13 @@ public Page<Product> search(List<Long> categoryIds, String sort, String keyword,
  * 避免用户拿旧链接直接看到草稿商品。
  */
 public Optional<Product> findOnSaleById(Long productId) {
-    if (productId == null) {
+    if (productId == null)
         return Optional.empty();
-    }
+    
     Product product = productMapper.selectById(productId);
-    if (product == null || !STATUS_ON_SALE.equals(product.getStatus())) {
+    if (product == null || !STATUS_ON_SALE.equals(product.getStatus()))
         return Optional.empty();
-    }
+    
     return Optional.of(product);
 }
 
@@ -117,9 +124,9 @@ public Optional<Product> findOnSaleById(Long productId) {
  * 模板回退为只显示封面。
  */
 public List<ProductImage> getImages(Long productId) {
-    if (productId == null) {
+    if (productId == null)
         return List.of();
-    }
+    
     return productImageMapper.selectList(Wrappers.<ProductImage>lambdaQuery()
                                                  .eq(ProductImage::getProductId, productId)
                                                  .orderByAsc(ProductImage::getSortOrder)
@@ -127,9 +134,9 @@ public List<ProductImage> getImages(Long productId) {
 }
 
 public static String normalizeSort(String raw) {
-    if (raw == null) {
+    if (raw == null)
         return SORT_DEFAULT;
-    }
+    
     return switch (raw) {
         case SORT_PRICE_ASC -> SORT_PRICE_ASC;
         case SORT_PRICE_DESC -> SORT_PRICE_DESC;

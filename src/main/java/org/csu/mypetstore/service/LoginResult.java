@@ -8,25 +8,26 @@ import org.csu.mypetstore.session.LoginUser;
  */
 public record LoginResult(Status status, LoginUser user) {
 
-    public enum Status {
-        OK,
-        BAD_CREDENTIALS,
-        DISABLED
-    }
+public enum Status {
+    OK,
+    BAD_CREDENTIALS,
+    DISABLED
+}
 
-    public static LoginResult ok(LoginUser user) {
-        return new LoginResult(Status.OK, user);
-    }
+public static LoginResult ok(LoginUser user) {
+    return new LoginResult(Status.OK, user);
+}
 
-    public static LoginResult badCredentials() {
-        return new LoginResult(Status.BAD_CREDENTIALS, null);
-    }
+public static LoginResult badCredentials() {
+    return new LoginResult(Status.BAD_CREDENTIALS, null);
+}
 
-    public static LoginResult disabled() {
-        return new LoginResult(Status.DISABLED, null);
-    }
+public static LoginResult disabled() {
+    return new LoginResult(Status.DISABLED, null);
+}
 
-    public boolean isOk() {
-        return status == Status.OK;
-    }
+public boolean isOk() {
+    return status == Status.OK;
+}
+
 }
