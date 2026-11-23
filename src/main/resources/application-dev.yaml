@@ -17,8 +17,13 @@ server:
   port: 8080
   servlet:
     session:
+      # 只用 cookie 跟踪会话：否则无 cookie 时 Tomcat 会把 ;JSESSIONID 拼进 URL 和 Location 里，
+      # 既泄露会话号又难看
+      tracking-modes: cookie
+      timeout: 30m
       cookie:
         name: PETSTORE_USER_SESSION
+        http-only: true
 
 mybatis-plus:
   configuration:

@@ -24,7 +24,8 @@
         <nav class="app-nav">
             <span class="app-nav__user" th:if="${session.loginUser != null}"
                   th:text="${session.loginUser.displayName}">林同学</span>
-            <a th:if="${session.loginUser == null}" th:href="@{/signon}">登录</a>
+            <a th:if="${session.loginUser == null}"
+               th:href="@{/signon(returnUrl=${currentPath})}">登录</a>
             <a th:if="${session.loginUser != null}" th:href="@{/signout}">退出</a>
             <a class="cart" href="#">购物车 <b>0</b></a>
             <a href="#">我的订单</a>

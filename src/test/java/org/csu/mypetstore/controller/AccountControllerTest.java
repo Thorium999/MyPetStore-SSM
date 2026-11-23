@@ -10,6 +10,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -34,6 +36,36 @@ class AccountControllerTest {
         mockMvc.perform(get("/signon"))
                .andExpect(status().isOk())
                .andExpect(content().string(org.hamcrest.Matchers.containsString("登录")));
+    }
+
+    @Test
+    void loginPageKeepsReturnUrlForRoundTrip() throws Exception {
+        mockMvc.perform(get("/signon").param("returnUrl", "/category?categoryId=1"))
+               .andExpect(status().isOk())
+               .andExpect(model().attribute("returnUrl", "/category?categoryId=1"))
+               .andExpect(content().string(containsString("name=\"returnUrl\"")))
+               .andExpect(content().string(containsString("/category?categoryId=1")));
+    }
+
+    @Test
+    void loginPageDropsUnsafeReturnUrl() throws Exception {
+        mockMvc.perform(get("/signon").param("returnUrl", "//evil.example.com"))
+               .andExpect(status().isOk())
+               .andExpect(model().attributeDoesNotExist("returnUrl"))
+               .andExpect(content().string(not(containsString("name=\"returnUrl\""))));
+    }
+
+    @Test
+    void headerCarriesCurrentPageAsReturnUrl() throws Exception {
+        // Thymeleaf 会把 = 和 & 编码，/ 与 ? 保持原样
+        mockMvc.perform(get("/category"))
+               .andExpect(status().isOk())
+               .andExpect(content().string(containsString("returnUrl=/category")));
+
+        // 注意用带查询串的 URL：.param() 不会写进 getQueryString()
+        mockMvc.perform(get("/category?categoryId=1"))
+               .andExpect(status().isOk())
+               .andExpect(content().string(containsString("returnUrl=/category?categoryId%3D1")));
     }
 
     @Test

@@ -26,9 +26,14 @@ public AccountController(AccountService accountService) {
 }
 
 @GetMapping("/signon")
-public String signonPage(HttpSession session) {
+public String signonPage(@RequestParam(required = false) String returnUrl,
+                         HttpSession session,
+                         Model model) {
     if (LoginSession.isLoggedIn(session))
         return "redirect:" + HOME;
+
+    // 把"从哪来"带进表单，登录成功后才能真正回到原页面
+    model.addAttribute("returnUrl", normalizeReturnUrl(returnUrl));
     return LOGIN_VIEW;
 }
 
@@ -61,16 +66,28 @@ public String signout(HttpSession session) {
 }
 
 /**
- * 只接受站内相对路径。挡三类写法：
- * http(s):// 绝对地址、//host 协议相对地址、/\host（浏览器会把反斜杠当斜杠）。
+ * 回跳目标：安全就用它，否则退回首页。
+ * 挡三类写法：http(s):// 绝对地址、//host 协议相对地址、/\host（浏览器会把反斜杠当斜杠）。
  */
 private String safeReturnUrl(String returnUrl) {
-    if (returnUrl == null)
-        return HOME;
+    return isSafeInternalPath(returnUrl) ? returnUrl.trim() : HOME;
+}
+
+/** 登录页回填用：不安全的直接丢掉，别让它进隐藏域。登录页自身也不做回跳目标。 */
+private String normalizeReturnUrl(String returnUrl) {
+    if (!isSafeInternalPath(returnUrl)) {
+        return null;
+    }
     String url = returnUrl.trim();
-    if (!url.startsWith("/") || url.startsWith("//") || url.contains("\\"))
-        return HOME;
-    return url;
+    return url.startsWith("/signon") ? null : url;
+}
+
+private boolean isSafeInternalPath(String url) {
+    if (url == null) {
+        return false;
+    }
+    String value = url.trim();
+    return value.startsWith("/") && !value.startsWith("//") && !value.contains("\\");
 }
 
 }
