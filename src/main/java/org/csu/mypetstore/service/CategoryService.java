@@ -94,6 +94,21 @@ public static String normalizeProductType(String raw) {
     return TYPE_ALL;
 }
 
+/** 由二级分类的编码后缀判断它属于宠物还是用品；一级或未知返回 ALL。 */
+public static String typeOf(Category category) {
+    if (category == null || category.getCode() == null) {
+        return TYPE_ALL;
+    }
+    String code = category.getCode();
+    if (code.endsWith(CODE_SUFFIX_SUPPLIES)) {
+        return TYPE_SUPPLIES;
+    }
+    if (code.endsWith(CODE_SUFFIX_PETS)) {
+        return TYPE_PETS;
+    }
+    return TYPE_ALL;
+}
+
 private List<Category> selectAllOrdered() {
     return categoryMapper.selectList(Wrappers.<Category>lambdaQuery()
                                              .orderByAsc(Category::getSortOrder)

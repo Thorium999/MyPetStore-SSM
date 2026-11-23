@@ -54,23 +54,30 @@ public String productList(@RequestParam(required = false) Long categoryId,
     String type = CategoryService.normalizeProductType(productType);
     String appliedSort = ProductService.normalizeSort(sort);
 
-    List<Long> categoryIds = categoryService.resolveProductCategoryIds(categoryId, type);
-    Page<Product> result = productService.search(categoryIds, appliedSort, keyword, page, pageSize);
+    // 页面状态统一成「一级分类 + 类型」：从首页点二级进来（如 101）时，
+    // 折算成 犬类 + 宠物，这样筛选按钮的选中态和 URL 都能对上。
+    Category selected = categoryService.findById(categoryId).orElse(null);
+    Long activeTopId = null;
+    if (selected != null) {
+        if (selected.getParentId() == null) {
+            activeTopId = selected.getId();
+        } else {
+            activeTopId = selected.getParentId();
+            type = CategoryService.typeOf(selected);
+        }
+    }
 
-    Category current = categoryService.findById(categoryId).orElse(null);
-    Category parent = (current != null && current.getParentId() != null)
-                      ? categoryService.findById(current.getParentId()).orElse(null)
-                      : null;
+    List<Long> categoryIds = categoryService.resolveProductCategoryIds(activeTopId, type);
+    Page<Product> result = productService.search(categoryIds, appliedSort, keyword, page, pageSize);
 
     model.addAttribute("nav", categoryService.getNavigation());
     model.addAttribute("page", result);
-    model.addAttribute("categoryId", categoryId);
+    model.addAttribute("activeTopId", activeTopId);
+    model.addAttribute("currentCategory", categoryService.findById(activeTopId).orElse(null));
     model.addAttribute("productType", type);
     model.addAttribute("sort", appliedSort);
     model.addAttribute("keyword", keyword == null ? "" : keyword);
     model.addAttribute("pageSize", result.getSize());
-    model.addAttribute("currentCategory", current);
-    model.addAttribute("parentCategory", parent);
     return "Category";
 }
 
