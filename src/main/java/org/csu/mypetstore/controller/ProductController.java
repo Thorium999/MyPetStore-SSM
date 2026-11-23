@@ -5,10 +5,12 @@ import org.csu.mypetstore.entity.Category;
 import org.csu.mypetstore.entity.Product;
 import org.csu.mypetstore.service.CategoryService;
 import org.csu.mypetstore.service.ProductService;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -70,6 +72,27 @@ public String productList(@RequestParam(required = false) Long categoryId,
     model.addAttribute("currentCategory", current);
     model.addAttribute("parentCategory", parent);
     return "Category";
+}
+
+@GetMapping("/product")
+public String productDetail(@RequestParam Long id, Model model) {
+    Product product = productService.findOnSaleById(id)
+                                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "商品不存在或已下架"));
+
+    Category category = categoryService.findById(product.getCategoryId()).orElse(null);
+    Category parent = (category != null && category.getParentId() != null)
+                      ? categoryService.findById(category.getParentId()).orElse(null)
+                      : null;
+
+    int stock = product.getStock() == null ? 0 : product.getStock();
+
+    model.addAttribute("product", product);
+    model.addAttribute("images", productService.getImages(product.getId()));
+    model.addAttribute("category", category);
+    model.addAttribute("parentCategory", parent);
+    model.addAttribute("soldOut", stock == 0);
+    model.addAttribute("maxQuantity", Math.min(stock, ProductService.MAX_QUANTITY));
+    return "Product";
 }
 
 }

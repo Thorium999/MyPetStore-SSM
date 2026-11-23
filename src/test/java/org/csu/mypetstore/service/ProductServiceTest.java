@@ -2,6 +2,7 @@ package org.csu.mypetstore.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.csu.mypetstore.entity.Product;
+import org.csu.mypetstore.entity.ProductImage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -115,5 +116,35 @@ class ProductServiceTest {
         Page<Product> result = productService.search(null, null, null, 1, 50);
 
         assertThat(result.getRecords()).allSatisfy(p -> assertThat(p.getStatus()).isEqualTo(ON_SALE));
+    }
+
+    @Test
+    void findsOnSaleProductForDetailPage() {
+        assertThat(productService.findOnSaleById(1L)).map(Product::getSku).contains("K9-BGL-03");
+    }
+
+    @Test
+    void hidesDraftProductFromDetailPage() {
+        assertThat(productService.findOnSaleById(30L)).isEmpty();
+    }
+
+    @Test
+    void hidesMissingProductFromDetailPage() {
+        assertThat(productService.findOnSaleById(99999L)).isEmpty();
+        assertThat(productService.findOnSaleById(null)).isEmpty();
+    }
+
+    @Test
+    void loadsAlbumOrderedBySortOrder() {
+        List<ProductImage> images = productService.getImages(1L);
+
+        assertThat(images).hasSize(4);
+        assertThat(images).extracting(ProductImage::getSortOrder).containsExactly(10, 20, 30, 40);
+        assertThat(images).allSatisfy(img -> assertThat(img.getImagePath()).startsWith("images/"));
+    }
+
+    @Test
+    void returnsEmptyAlbumWhenProductHasNoImages() {
+        assertThat(productService.getImages(21L)).isEmpty();
     }
 }

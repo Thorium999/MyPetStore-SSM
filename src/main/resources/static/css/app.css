@@ -531,6 +531,154 @@ img {
     color: #fff;
 }
 
+/* ---------- 详情页 ---------- */
+
+.breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 18px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.breadcrumb a:hover {
+    color: var(--accent);
+}
+
+.detail {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 32px;
+    align-items: start;
+}
+
+.gallery__main {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #efece5;
+    border: 1px solid var(--line);
+}
+
+.gallery__main img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gallery__thumbs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.thumb {
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface);
+    cursor: pointer;
+    aspect-ratio: 1 / 1;
+}
+
+.thumb:hover {
+    border-color: var(--accent);
+}
+
+.thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.info {
+    padding: 26px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.info h1 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.info__summary {
+    margin: 0 0 18px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.info__row {
+    display: flex;
+    gap: 12px;
+    padding: 8px 0;
+    font-size: 14px;
+    border-top: 1px dashed var(--line);
+}
+
+.info__label {
+    width: 72px;
+    color: var(--muted);
+}
+
+.is-out {
+    color: var(--warm);
+    font-weight: 600;
+}
+
+.price--lg {
+    margin: 18px 0;
+    font-size: 30px;
+}
+
+.buy {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+}
+
+.buy__qty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.buy__qty select {
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg);
+    font: inherit;
+    color: var(--ink);
+}
+
+.btn[disabled] {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.desc {
+    margin: 0;
+    padding: 22px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: #4b463f;
+    white-space: pre-line;
+}
+
 /* ---------- 页脚 ---------- */
 
 .app-footer {
@@ -631,6 +779,11 @@ img {
     .catalog {
         grid-template-columns: minmax(0, 1fr);
         gap: 18px;
+    }
+
+    .detail {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 20px;
     }
 
     .rail {

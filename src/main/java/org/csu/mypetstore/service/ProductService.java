@@ -4,10 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.csu.mypetstore.entity.Product;
+import org.csu.mypetstore.entity.ProductImage;
+import org.csu.mypetstore.mapper.ProductImageMapper;
 import org.csu.mypetstore.mapper.ProductMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -25,14 +28,19 @@ public static final String SORT_NEWEST = "NEWEST";
 public static final int DEFAULT_PAGE_SIZE = 6;
 public static final int MAX_PAGE_SIZE = 50;
 
+/** 单次购买数量上限（PRD：1—99） */
+public static final int MAX_QUANTITY = 99;
+
 /** 首页两个栏目的条数上限 */
 private static final int NEW_ARRIVAL_LIMIT = 3;
 private static final int FEATURED_LIMIT = 4;
 
 private final ProductMapper productMapper;
+private final ProductImageMapper productImageMapper;
 
-public ProductService(ProductMapper productMapper) {
+public ProductService(ProductMapper productMapper, ProductImageMapper productImageMapper) {
     this.productMapper = productMapper;
+    this.productImageMapper = productImageMapper;
 }
 
 /**
@@ -87,6 +95,35 @@ public Page<Product> search(List<Long> categoryIds, String sort, String keyword,
     applySort(query, sort);
 
     return productMapper.selectPage(pageRequest, query);
+}
+
+/**
+ * 详情页：按 id 取上架商品。下架或不存在都返回空，由 Controller 转 404，
+ * 避免用户拿旧链接直接看到草稿商品。
+ */
+public Optional<Product> findOnSaleById(Long productId) {
+    if (productId == null) {
+        return Optional.empty();
+    }
+    Product product = productMapper.selectById(productId);
+    if (product == null || !STATUS_ON_SALE.equals(product.getStatus())) {
+        return Optional.empty();
+    }
+    return Optional.of(product);
+}
+
+/**
+ * 详情页相册：按 sort_order、id 升序。没有相册的商品返回空列表，
+ * 模板回退为只显示封面。
+ */
+public List<ProductImage> getImages(Long productId) {
+    if (productId == null) {
+        return List.of();
+    }
+    return productImageMapper.selectList(Wrappers.<ProductImage>lambdaQuery()
+                                                 .eq(ProductImage::getProductId, productId)
+                                                 .orderByAsc(ProductImage::getSortOrder)
+                                                 .orderByAsc(ProductImage::getId));
 }
 
 public static String normalizeSort(String raw) {
