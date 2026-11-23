@@ -69,13 +69,16 @@
 
                 <form class="buy" method="post" th:action="@{/cart}">
                     <input type="hidden" name="productId" th:value="${product.id}"/>
-                    <label class="buy__qty">
-                        数量
-                        <select name="quantity" th:disabled="${soldOut}">
-                            <option th:each="i : ${#numbers.sequence(1, maxQuantity)}"
-                                    th:value="${i}" th:text="${i}">1</option>
-                        </select>
-                    </label>
+                    <label class="buy__qty" for="quantity">数量</label>
+                    <div class="qty">
+                        <button class="qty__step" type="button" data-step="-1"
+                                th:disabled="${soldOut}" aria-label="减少数量">−</button>
+                        <input class="qty__input" id="quantity" type="number" name="quantity"
+                               value="1" min="1" th:max="${maxQuantity}" step="1"
+                               th:disabled="${soldOut}" aria-label="购买数量"/>
+                        <button class="qty__step" type="button" data-step="1"
+                                th:disabled="${soldOut}" aria-label="增加数量">+</button>
+                    </div>
                     <button class="btn" type="submit" th:disabled="${soldOut}"
                             title="购物车模块接入后启用">加入购物车
                     </button>
@@ -103,6 +106,31 @@
             document.getElementById('mainImage').src = button.dataset.src;
         });
     });
+
+    // 数量步进：点 ± 调整；手输越界在 change / 提交前夹回 1—max
+    (function () {
+        var input = document.getElementById('quantity');
+        if (!input) {
+            return;
+        }
+        var min = Number(input.min) || 1;
+        var max = Number(input.max) || min;
+        var clamp = function () {
+            input.value = Math.min(Math.max(Number(input.value) || min, min), max);
+        };
+
+        document.querySelectorAll('.qty__step').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var next = (Number(input.value) || min) + Number(button.dataset.step);
+                input.value = Math.min(Math.max(next, min), max);
+            });
+        });
+
+        input.addEventListener('change', clamp);
+        if (input.form) {
+            input.form.addEventListener('submit', clamp);
+        }
+    })();
 </script>
 
 </body>

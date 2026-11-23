@@ -673,13 +673,56 @@ img {
     color: var(--muted);
 }
 
-.buy__qty select {
-    padding: 8px 12px;
+/* 数量步进：− 输入框 +，比下拉适合"可能很大"的数值 */
+.qty {
+    display: inline-flex;
+    align-items: stretch;
     border: 1px solid var(--line);
     border-radius: 10px;
+    overflow: hidden;
     background: var(--bg);
-    font: inherit;
+}
+
+.qty__step {
+    width: 34px;
+    border: 0;
+    background: transparent;
     color: var(--ink);
+    font: inherit;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.qty__step:hover:not([disabled]) {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.qty__step[disabled] {
+    cursor: not-allowed;
+    opacity: .45;
+}
+
+.qty__input {
+    width: 58px;
+    padding: 8px 0;
+    border: 0;
+    border-left: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    text-align: center;
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.qty__input::-webkit-outer-spin-button,
+.qty__input::-webkit-inner-spin-button {
+    margin: 0;
+    appearance: none;
+    -webkit-appearance: none;
 }
 
 .btn[disabled] {
