@@ -140,6 +140,24 @@ img {
     color: var(--accent);
 }
 
+/* 退出是 POST 表单，样式伪装成普通链接 */
+.app-nav__logout {
+    margin: 0;
+}
+
+.app-nav__logout button {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+
+.app-nav__logout button:hover {
+    color: var(--accent);
+}
+
 .app-nav .cart {
     padding: 6px 14px;
     border: 1px solid var(--line);

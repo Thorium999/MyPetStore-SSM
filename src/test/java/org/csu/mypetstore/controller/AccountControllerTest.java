@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -66,6 +67,39 @@ class AccountControllerTest {
         mockMvc.perform(get("/category?categoryId=1"))
                .andExpect(status().isOk())
                .andExpect(content().string(containsString("returnUrl=/category?categoryId%3D1")));
+    }
+
+    @Test
+    void refusesReturnUrlPointingAtAnAction() throws Exception {
+        // /signout 是动作不是页面：不能当回跳目标，否则登录完立刻被登出
+        mockMvc.perform(get("/signon").param("returnUrl", "/signout"))
+               .andExpect(status().isOk())
+               .andExpect(model().attributeDoesNotExist("returnUrl"));
+
+        mockMvc.perform(post("/signon")
+                                .param("username", "alice")
+                                .param("password", PASSWORD)
+                                .param("returnUrl", "/signout"))
+               .andExpect(redirectedUrl("/main"));
+    }
+
+    @Test
+    void signoutRejectsGet() throws Exception {
+        mockMvc.perform(get("/signout"))
+               .andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
+    void signoutInvalidatesSession() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(LoginSession.KEY,
+                new LoginUser(1L, "alice", "林同学", "CUSTOMER"));
+
+        mockMvc.perform(post("/signout").session(session))
+               .andExpect(status().is3xxRedirection())
+               .andExpect(redirectedUrl("/main"));
+
+        assertThat(session.isInvalid()).isTrue();
     }
 
     @Test

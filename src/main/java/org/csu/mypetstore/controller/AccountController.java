@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 /**
  * 登录 / 退出。只做转发与提示文案，校验逻辑全在 AccountService。
  */
@@ -18,6 +20,13 @@ public class AccountController {
 
 private static final String LOGIN_VIEW = "signon";
 private static final String HOME = "/main";
+
+/**
+ * 允许作为登录回跳目标的页面（只列"看"的页面，不列"做"的动作）。
+ * 白名单而不是黑名单：以后新增有副作用的 GET/动作不会被顺手放进来。
+ * 注意 /signout 是 POST，本来也不在这里。
+ */
+private static final List<String> RETURN_PAGES = List.of("/main", "/category", "/product", "/cart", "/orders");
 
 private final AccountService accountService;
 
@@ -59,35 +68,40 @@ public String signon(@RequestParam String username,
     return LOGIN_VIEW;
 }
 
-@GetMapping("/signout")
+/**
+ * 退出必须是 POST：GET 是"安全方法"，浏览器预取、链接预加载都会打到它，
+ * 用 GET 退出会导致"打开页面就被登出"。这里顺带作废整个会话。
+ */
+@PostMapping("/signout")
 public String signout(HttpSession session) {
-    LoginSession.clear(session);
+    session.invalidate();
     return "redirect:" + HOME;
 }
 
 /**
- * 回跳目标：安全就用它，否则退回首页。
- * 挡三类写法：http(s):// 绝对地址、//host 协议相对地址、/\host（浏览器会把反斜杠当斜杠）。
+ * 回跳目标：在白名单页面内就用它，否则退回首页。
+ * 另外挡住三类写法：http(s):// 绝对地址、//host 协议相对地址、/\host（浏览器会把反斜杠当斜杠）。
  */
 private String safeReturnUrl(String returnUrl) {
-    return isSafeInternalPath(returnUrl) ? returnUrl.trim() : HOME;
+    return isAllowedPage(returnUrl) ? returnUrl.trim() : HOME;
 }
 
-/** 登录页回填用：不安全的直接丢掉，别让它进隐藏域。登录页自身也不做回跳目标。 */
+/** 登录页回填用：不合规的直接丢掉，别让它进隐藏域。 */
 private String normalizeReturnUrl(String returnUrl) {
-    if (!isSafeInternalPath(returnUrl)) {
-        return null;
-    }
-    String url = returnUrl.trim();
-    return url.startsWith("/signon") ? null : url;
+    return isAllowedPage(returnUrl) ? returnUrl.trim() : null;
 }
 
-private boolean isSafeInternalPath(String url) {
+private boolean isAllowedPage(String url) {
     if (url == null) {
         return false;
     }
     String value = url.trim();
-    return value.startsWith("/") && !value.startsWith("//") && !value.contains("\\");
+    if (!value.startsWith("/") || value.startsWith("//") || value.contains("\\")) {
+        return false;
+    }
+    return RETURN_PAGES.stream().anyMatch(page -> value.equals(page)
+                                                  || value.startsWith(page + "?")
+                                                  || value.startsWith(page + "/"));
 }
 
 }
