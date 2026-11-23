@@ -75,6 +75,7 @@
                                 th:disabled="${soldOut}" aria-label="减少数量">−</button>
                         <input class="qty__input" id="quantity" type="number" name="quantity"
                                value="1" min="1" th:max="${maxQuantity}" step="1"
+                               inputmode="numeric" autocomplete="off"
                                th:disabled="${soldOut}" aria-label="购买数量"/>
                         <button class="qty__step" type="button" data-step="1"
                                 th:disabled="${soldOut}" aria-label="增加数量">+</button>
@@ -107,7 +108,7 @@
         });
     });
 
-    // 数量步进：点 ± 调整；手输越界在 change / 提交前夹回 1—max
+    // 数量步进：只接受正整数；点 ± 调整；失焦 / 提交前夹回 1—max
     (function () {
         var input = document.getElementById('quantity');
         if (!input) {
@@ -115,20 +116,47 @@
         }
         var min = Number(input.min) || 1;
         var max = Number(input.max) || min;
-        var clamp = function () {
-            input.value = Math.min(Math.max(Number(input.value) || min, min), max);
+
+        // 当前值统一取整，13.5 这类脏值进不来
+        var current = function () {
+            var value = Math.trunc(Number(input.value));
+            return isNaN(value) ? min : value;
+        };
+        var clamp = function (value) {
+            return Math.min(Math.max(value, min), max);
         };
 
         document.querySelectorAll('.qty__step').forEach(function (button) {
             button.addEventListener('click', function () {
-                var next = (Number(input.value) || min) + Number(button.dataset.step);
-                input.value = Math.min(Math.max(next, min), max);
+                input.value = clamp(current() + Number(button.dataset.step));
             });
         });
 
-        input.addEventListener('change', clamp);
+        // 聚焦全选，直接输入就能覆盖原来的 1
+        input.addEventListener('focus', function () {
+            input.select();
+        });
+
+        // 拦掉小数点、正负号、科学计数法的 e
+        input.addEventListener('keydown', function (event) {
+            if (['.', ',', 'e', 'E', '+', '-'].indexOf(event.key) >= 0) {
+                event.preventDefault();
+            }
+        });
+
+        // 粘贴进来的小数也截断
+        input.addEventListener('input', function () {
+            if (input.value.indexOf('.') >= 0) {
+                input.value = String(Math.trunc(Number(input.value)) || min);
+            }
+        });
+
+        var normalize = function () {
+            input.value = clamp(current());
+        };
+        input.addEventListener('change', normalize);
         if (input.form) {
-            input.form.addEventListener('submit', clamp);
+            input.form.addEventListener('submit', normalize);
         }
     })();
 </script>
