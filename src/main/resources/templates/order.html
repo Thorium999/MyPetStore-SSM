@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="'订单 ' + ${order.orderNo} + ' | MyPetStore'">订单详情 | MyPetStore</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<!-- 订单详情。Model：order、statusLabel、items -->
+<body>
+
+<div th:replace="~{fragments/layout :: siteHeader}"></div>
+
+<main class="page">
+    <div class="wrap">
+
+        <nav class="breadcrumb">
+            <a th:href="@{/main}">首页</a>
+            <span>/</span>
+            <a th:href="@{/orders}">我的订单</a>
+            <span>/</span>
+            <span th:text="${order.orderNo}">ORD...</span>
+        </nav>
+
+        <p class="notice" th:if="${notice}" th:text="${notice}">订单已创建</p>
+
+        <div class="content__head">
+            <h1>
+                <span th:text="${order.orderNo}">ORD...</span>
+                <span class="pill" th:classappend="'pill--' + ${#strings.toLowerCase(order.status)}"
+                      th:text="${statusLabel}">待付款</span>
+            </h1>
+            <span class="hint"
+                  th:text="'下单时间 ' + ${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}">下单时间</span>
+        </div>
+
+        <section class="order-block">
+            <h2 class="checkout__title">收货信息</h2>
+            <p class="order-block__line">
+                <span class="order-block__label">收货人</span>
+                <span th:text="${order.receiverName}">林同学</span>
+            </p>
+            <p class="order-block__line">
+                <span class="order-block__label">电话</span>
+                <span th:text="${order.receiverPhone}">13800000000</span>
+            </p>
+            <p class="order-block__line">
+                <span class="order-block__label">地址</span>
+                <span th:text="${order.receiverAddress}">地址</span>
+            </p>
+        </section>
+
+        <section class="order-block">
+            <h2 class="checkout__title">商品明细</h2>
+            <div class="order-items">
+                <div class="order-items__row order-items__row--head">
+                    <span>商品</span>
+                    <span>单价</span>
+                    <span>数量</span>
+                    <span>小计</span>
+                </div>
+                <div class="order-items__row" th:each="item : ${items}">
+                    <div class="cart__product">
+                        <img th:src="@{'/' + ${item.coverImageSnapshot}}" th:alt="${item.productNameSnapshot}"/>
+                        <div class="cart__meta">
+                            <a th:href="@{/product(id=${item.productId})}"
+                               th:text="${item.productNameSnapshot}">商品名</a>
+                            <span class="card__meta" th:text="${item.skuSnapshot}">SKU</span>
+                        </div>
+                    </div>
+                    <span class="cart__price">
+                        <small>¥</small><span th:text="${#numbers.formatDecimal(item.unitPrice, 1, 2)}">0.00</span>
+                    </span>
+                    <span th:text="${item.quantity}">1</span>
+                    <span class="cart__subtotal">
+                        <small>¥</small><span th:text="${#numbers.formatDecimal(item.lineAmount, 1, 2)}">0.00</span>
+                    </span>
+                </div>
+            </div>
+            <div class="order-block__total">
+                <span class="hint">订单金额</span>
+                <span class="price price--lg">
+                    <small>¥</small><span
+                        th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">0.00</span>
+                </span>
+            </div>
+        </section>
+
+        <p class="hint">支付与取消功能在下一步实现，当前订单为待付款状态。</p>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: siteFooter}"></div>
+
+</body>
+</html>

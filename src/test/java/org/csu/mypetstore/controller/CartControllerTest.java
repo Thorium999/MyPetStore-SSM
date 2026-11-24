@@ -1,5 +1,8 @@
 package org.csu.mypetstore.controller;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import org.csu.mypetstore.entity.CartItem;
+import org.csu.mypetstore.mapper.CartItemMapper;
 import org.csu.mypetstore.session.LoginSession;
 import org.csu.mypetstore.session.LoginUser;
 import org.junit.jupiter.api.Test;
@@ -30,6 +33,8 @@ class CartControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private CartItemMapper cartItemMapper;
 
     @Test
     void cartPageRequiresLogin() throws Exception {
@@ -53,6 +58,11 @@ class CartControllerTest {
 
     @Test
     void loggedInUserSeesCartWithIssues() throws Exception {
+        clearCart(1L);
+        addDirectly(1L, 21L, 1);
+        addDirectly(1L, 30L, 1);   // DRAFT：页面应标出"已下架"
+        addDirectly(1L, 34L, 1);   // 库存 0：页面应标出"已售罄"
+
         mockMvc.perform(get("/cart").session(aliceSession()))
                .andExpect(status().isOk())
                .andExpect(content().string(containsString("购物车")))
@@ -78,6 +88,19 @@ class CartControllerTest {
 
         mockMvc.perform(post("/cart/1/delete"))
                .andExpect(redirectedUrl("/signon?returnUrl=%2Fcart%2F1%2Fdelete"));
+    }
+
+    private void clearCart(Long userId) {
+        cartItemMapper.delete(Wrappers.<CartItem>lambdaQuery().eq(CartItem::getUserId, userId));
+    }
+
+    private void addDirectly(Long userId, Long productId, int quantity) {
+        CartItem item = new CartItem();
+        item.setUserId(userId);
+        item.setProductId(productId);
+        item.setQuantity(quantity);
+        item.setVersion(0L);
+        cartItemMapper.insert(item);
     }
 
     private MockHttpSession aliceSession() {

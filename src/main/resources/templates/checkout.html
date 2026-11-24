@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>确认订单 | MyPetStore</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<!-- 结算页。Model：cart（CartSnapshot）、profileName / profilePhone（用于预填） -->
+<body>
+
+<div th:replace="~{fragments/layout :: siteHeader}"></div>
+
+<main class="page">
+    <div class="wrap">
+
+        <div class="content__head">
+            <h1>确认订单</h1>
+            <span class="hint" th:text="'共 ' + ${cart.itemCount} + ' 件'">共 0 件</span>
+        </div>
+
+        <p class="alert" th:if="${error}" th:text="${error}">下单失败</p>
+
+        <div class="checkout">
+            <form class="checkout__form" method="post" th:action="@{/orders}">
+                <h2 class="checkout__title">收货信息</h2>
+
+                <label class="field">
+                    <span>收货人</span>
+                    <input type="text" name="receiverName" required maxlength="50"
+                           th:value="${profileName}" autocomplete="name"/>
+                </label>
+
+                <label class="field">
+                    <span>联系电话</span>
+                    <input type="text" name="receiverPhone" required maxlength="30"
+                           th:value="${profilePhone}" autocomplete="tel"/>
+                </label>
+
+                <label class="field">
+                    <span>收货地址</span>
+                    <textarea name="receiverAddress" rows="3" required maxlength="255"
+                              placeholder="省 / 市 / 区 + 详细地址" autocomplete="street-address"></textarea>
+                </label>
+
+                <button class="btn" type="submit">提交订单</button>
+                <p class="hint">提交后会立即扣减库存并生成待付款订单，支付在下一步完成。</p>
+            </form>
+
+            <aside class="checkout__side">
+                <h2 class="checkout__title">商品清单</h2>
+                <ul class="checkout__list">
+                    <li th:each="line : ${cart.lines}">
+                        <span class="checkout__name" th:text="${line.name}">商品名</span>
+                        <span class="checkout__qty" th:text="'× ' + ${line.quantity}">× 1</span>
+                        <span class="checkout__amount">
+                            <small>¥</small><span th:text="${#numbers.formatDecimal(line.subtotal, 1, 2)}">0.00</span>
+                        </span>
+                    </li>
+                </ul>
+                <div class="checkout__total">
+                    <span class="hint">合计</span>
+                    <span class="price price--lg">
+                        <small>¥</small><span
+                            th:text="${#numbers.formatDecimal(cart.totalAmount, 1, 2)}">0.00</span>
+                    </span>
+                </div>
+            </aside>
+        </div>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: siteFooter}"></div>
+
+</body>
+</html>

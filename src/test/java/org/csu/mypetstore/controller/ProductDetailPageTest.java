@@ -1,5 +1,6 @@
 package org.csu.mypetstore.controller;
 
+import org.csu.mypetstore.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,15 +22,19 @@ class ProductDetailPageTest {
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private ProductService productService;
 
     @Test
     void quantityStepperIsBoundedByStock() throws Exception {
-        // 商品 1（比格犬）库存 10
+        // 不写死库存数字：库存被改过（下过单）也不会误报
+        int stock = productService.findOnSaleById(1L).orElseThrow().getStock();
+
         mockMvc.perform(get("/product?id=1"))
                .andExpect(status().isOk())
                .andExpect(content().string(containsString("class=\"qty__step\"")))
                .andExpect(content().string(containsString("min=\"1\"")))
-               .andExpect(content().string(containsString("max=\"10\"")))
+               .andExpect(content().string(containsString("max=\"" + stock + "\"")))
                .andExpect(content().string(not(containsString("已售罄"))));
     }
 

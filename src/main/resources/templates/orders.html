@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>我的订单 | MyPetStore</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: siteHeader}"></div>
+
+<main class="page">
+    <div class="wrap">
+
+        <div class="content__head">
+            <h1>我的订单</h1>
+            <span class="hint" th:if="${!#lists.isEmpty(orders)}"
+                  th:text="'共 ' + ${#lists.size(orders)} + ' 单'">共 0 单</span>
+        </div>
+
+        <p class="notice" th:if="${notice}" th:text="${notice}">订单已创建</p>
+
+        <div class="empty" th:if="${#lists.isEmpty(orders)}">
+            还没有订单，<a th:href="@{/category}">去挑点东西</a>
+        </div>
+
+        <div class="orders" th:unless="${#lists.isEmpty(orders)}">
+            <div class="orders__row orders__row--head">
+                <span>订单号</span>
+                <span>下单时间</span>
+                <span>金额</span>
+                <span>状态</span>
+                <span></span>
+            </div>
+            <div class="orders__row" th:each="o : ${orders}">
+                <a class="orders__no" th:href="@{/orders/{id}(id=${o.id})}" th:text="${o.orderNo}">ORD...</a>
+                <span class="orders__time"
+                      th:text="${#temporals.format(o.createdAt, 'yyyy-MM-dd HH:mm')}">2026-11-24 18:00</span>
+                <span class="orders__amount">
+                    <small>¥</small><span th:text="${#numbers.formatDecimal(o.totalAmount, 1, 2)}">0.00</span>
+                </span>
+                <span class="pill" th:classappend="'pill--' + ${#strings.toLowerCase(o.status)}"
+                      th:text="${o.statusLabel}">待付款</span>
+                <a class="linkish" th:href="@{/orders/{id}(id=${o.id})}">详情</a>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: siteFooter}"></div>
+
+</body>
+</html>

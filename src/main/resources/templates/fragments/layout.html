@@ -31,7 +31,7 @@
                 <button type="submit">退出</button>
             </form>
             <a class="cart" th:href="@{/cart}">购物车 <b th:text="${cartCount}">0</b></a>
-            <a href="#">我的订单</a>
+            <a th:href="@{/orders}">我的订单</a>
         </nav>
     </div>
 </header>

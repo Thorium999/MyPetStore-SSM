@@ -957,6 +957,244 @@ img {
     font-size: 24px;
 }
 
+/* ---------- 结算与订单 ---------- */
+
+.checkout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.checkout__form,
+.checkout__side,
+.order-block {
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.checkout__title {
+    margin: 0 0 16px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.checkout__form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.checkout__form .field textarea {
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg);
+    font: inherit;
+    color: var(--ink);
+    resize: vertical;
+}
+
+.checkout__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.checkout__list li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 10px;
+    align-items: baseline;
+    font-size: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--line);
+}
+
+.checkout__list li:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+.checkout__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.checkout__qty {
+    color: var(--muted);
+}
+
+.checkout__amount {
+    color: var(--warm);
+    white-space: nowrap;
+}
+
+.checkout__total {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+}
+
+.checkout__total .price--lg {
+    margin: 0;
+    font-size: 24px;
+}
+
+.orders {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.orders__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) 140px 110px 90px 60px;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+}
+
+.orders__row:last-child {
+    border-bottom: 0;
+}
+
+.orders__row--head {
+    font-size: 13px;
+    color: var(--muted);
+    background: var(--bg);
+}
+
+.orders__no {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 13px;
+}
+
+.orders__no:hover {
+    color: var(--accent);
+}
+
+.orders__time {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.orders__amount {
+    color: var(--warm);
+}
+
+.orders__amount small,
+.cart__price small,
+.cart__subtotal small {
+    font-size: 11px;
+    margin-right: 1px;
+}
+
+.pill {
+    justify-self: start;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.pill--pending_payment {
+    background: #fff4e5;
+    border-color: #f2d3a8;
+    color: #91590a;
+}
+
+.pill--paid {
+    background: var(--accent-soft);
+    border-color: #bfe0da;
+    color: #0b5f59;
+}
+
+.pill--shipped {
+    background: #eaf1fb;
+    border-color: #c6d8f0;
+    color: #1a4f8a;
+}
+
+.pill--completed {
+    background: #eef2ee;
+    border-color: #cddacd;
+    color: #3d5a3d;
+}
+
+.pill--cancelled {
+    background: #f2efee;
+    border-color: #dcd3d0;
+    color: #6b5a55;
+}
+
+.order-block {
+    margin-bottom: 20px;
+}
+
+.order-block__line {
+    display: flex;
+    gap: 12px;
+    margin: 0 0 8px;
+    font-size: 14px;
+}
+
+.order-block__label {
+    width: 60px;
+    flex: 0 0 auto;
+    color: var(--muted);
+}
+
+.order-items__row {
+    display: grid;
+    grid-template-columns: minmax(0, 2.4fr) 110px 80px 120px;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+}
+
+.order-items__row:last-child {
+    border-bottom: 0;
+}
+
+.order-items__row--head {
+    font-size: 13px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+}
+
+.order-block__total {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+}
+
+.order-block__total .price--lg {
+    margin: 0;
+    font-size: 24px;
+}
+
 /* ---------- 页脚 ---------- */
 
 .app-footer {
