@@ -1195,6 +1195,32 @@ img {
     font-size: 24px;
 }
 
+.btn--ghost {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink);
+}
+
+.btn--ghost:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.order-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0 0 20px;
+    padding: 18px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.order-actions form {
+    margin: 0;
+}
+
 /* ---------- 页脚 ---------- */
 
 .app-footer {

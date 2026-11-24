@@ -8,6 +8,7 @@ import org.csu.mypetstore.entity.SalesOrder;
 import org.csu.mypetstore.mapper.CartItemMapper;
 import org.csu.mypetstore.mapper.ProductMapper;
 import org.csu.mypetstore.mapper.SalesOrderMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +41,13 @@ class OrderServiceTest {
     private ProductMapper productMapper;
     @Autowired
     private SalesOrderMapper orderMapper;
+
+    @BeforeEach
+    void prepareCatalog() {
+        setStock(21L, 100);
+        setStock(30L, 12);
+        setStatus(30L, "DRAFT");
+    }
 
     @Test
     void rejectsCartWithBlockedLines() {
@@ -156,6 +164,101 @@ class OrderServiceTest {
         assertThat(OrderService.statusLabel("PENDING_PAYMENT")).isEqualTo("待付款");
         assertThat(OrderService.statusLabel("CANCELLED")).isEqualTo("已取消");
         assertThat(OrderService.statusLabel("UNKNOWN")).isEqualTo("UNKNOWN");
+    }
+
+    @Test
+    void paysPendingOrder() {
+        Long orderId = placeSingleItemOrder();
+
+        OrderAction action = orderService.pay(ALICE, orderId);
+
+        assertThat(action.success()).isTrue();
+        SalesOrder paid = orderMapper.selectById(orderId);
+        assertThat(paid.getStatus()).isEqualTo(OrderService.STATUS_PAID);
+        assertThat(paid.getPaymentMethod()).isEqualTo("MOCK");
+        assertThat(paid.getPaymentNo()).startsWith("PAY");
+        assertThat(paid.getPaidAt()).isNotNull();
+        assertThat(paid.getCancelledAt()).isNull();
+    }
+
+    @Test
+    void cannotPayTwice() {
+        Long orderId = placeSingleItemOrder();
+        orderService.pay(ALICE, orderId);
+
+        OrderAction second = orderService.pay(ALICE, orderId);
+
+        assertThat(second.success()).isFalse();
+        assertThat(second.message()).contains("已支付");
+        assertThat(orderMapper.selectById(orderId).getStatus()).isEqualTo(OrderService.STATUS_PAID);
+    }
+
+    @Test
+    void cancelRestoresStock() {
+        int stockBefore = stockOf(21L);
+        Long orderId = placeSingleItemOrder();
+        assertThat(stockOf(21L)).isEqualTo(stockBefore - 1);
+
+        OrderAction action = orderService.cancel(ALICE, orderId);
+
+        assertThat(action.success()).isTrue();
+        SalesOrder cancelled = orderMapper.selectById(orderId);
+        assertThat(cancelled.getStatus()).isEqualTo(OrderService.STATUS_CANCELLED);
+        assertThat(cancelled.getCancelledAt()).isNotNull();
+        assertThat(cancelled.getPaymentNo()).isNull();
+        assertThat(stockOf(21L)).isEqualTo(stockBefore);
+    }
+
+    @Test
+    void cannotCancelPaidOrder() {
+        Long orderId = placeSingleItemOrder();
+        orderService.pay(ALICE, orderId);
+
+        OrderAction action = orderService.cancel(ALICE, orderId);
+
+        assertThat(action.success()).isFalse();
+        assertThat(action.message()).contains("已支付");
+        assertThat(orderMapper.selectById(orderId).getStatus()).isEqualTo(OrderService.STATUS_PAID);
+    }
+
+    @Test
+    void cannotPayCancelledOrder() {
+        Long orderId = placeSingleItemOrder();
+        orderService.cancel(ALICE, orderId);
+
+        OrderAction action = orderService.pay(ALICE, orderId);
+
+        assertThat(action.success()).isFalse();
+        assertThat(action.message()).contains("已取消");
+    }
+
+    @Test
+    void cannotActOnSomeoneElsesOrder() {
+        Long orderId = placeSingleItemOrder();
+
+        assertThat(orderService.pay(BOB, orderId).message()).isEqualTo("订单不存在");
+        assertThat(orderService.cancel(BOB, orderId).message()).isEqualTo("订单不存在");
+        assertThat(orderMapper.selectById(orderId).getStatus()).isEqualTo(OrderService.STATUS_PENDING_PAYMENT);
+    }
+
+    private Long placeSingleItemOrder() {
+        clearCart(ALICE);
+        cartService.addItem(ALICE, 21L, 1);
+        return orderService.placeOrder(ALICE, RECEIVER);
+    }
+
+
+    /** 手动把商品调成已知状态：谁在页面上买空了货，测试也不受影响（事务结束自动回滚）。 */
+    private void setStock(Long productId, int stock) {
+        productMapper.update(null, Wrappers.<Product>lambdaUpdate()
+                .set(Product::getStock, stock)
+                .eq(Product::getId, productId));
+    }
+
+    private void setStatus(Long productId, String status) {
+        productMapper.update(null, Wrappers.<Product>lambdaUpdate()
+                .set(Product::getStatus, status)
+                .eq(Product::getId, productId));
     }
 
     private void addDirectly(Long userId, Long productId, int quantity) {

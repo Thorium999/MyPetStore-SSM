@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.csu.mypetstore.dto.CartLine;
 import org.csu.mypetstore.dto.CartSnapshot;
 import org.csu.mypetstore.entity.CartItem;
+import org.csu.mypetstore.entity.Product;
 import org.csu.mypetstore.mapper.CartItemMapper;
+import org.csu.mypetstore.mapper.ProductMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,6 +47,19 @@ class CartServiceTest {
     private CartService cartService;
     @Autowired
     private CartItemMapper cartItemMapper;
+    @Autowired
+    private ProductMapper productMapper;
+
+    @BeforeEach
+    void prepareCatalog() {
+        setStock(NORMAL_PRODUCT, 41);
+        setStock(ANOTHER_PRODUCT, 73);
+        setStock(LOW_STOCK_PRODUCT, 3);
+        setStock(HUGE_STOCK_PRODUCT, 119);
+        setStock(TIGHT_STOCK_PRODUCT, 1);
+        setStock(SOLD_OUT_PRODUCT, 0);
+        setStatus(DRAFT_PRODUCT, "DRAFT");
+    }
 
     @Test
     void marksEachBlockedLineWithItsOwnReason() {
@@ -176,6 +192,20 @@ class CartServiceTest {
 
         assertThat(cartService.countItems(BOB)).isEqualTo(5);
         assertThat(cartService.countItems(999L)).isZero();
+    }
+
+
+    /** 手动把商品调成已知状态：谁在页面上买空了货，测试也不受影响（事务结束自动回滚）。 */
+    private void setStock(Long productId, int stock) {
+        productMapper.update(null, Wrappers.<Product>lambdaUpdate()
+                .set(Product::getStock, stock)
+                .eq(Product::getId, productId));
+    }
+
+    private void setStatus(Long productId, String status) {
+        productMapper.update(null, Wrappers.<Product>lambdaUpdate()
+                .set(Product::getStatus, status)
+                .eq(Product::getId, productId));
     }
 
     /** 绕过 addItem 的校验直接插行：用来构造"下架 / 售罄 / 超库存"这类页面上做不出来的状态。 */

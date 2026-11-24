@@ -2,10 +2,13 @@ package org.csu.mypetstore.controller;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.csu.mypetstore.entity.CartItem;
+import org.csu.mypetstore.entity.Product;
 import org.csu.mypetstore.mapper.CartItemMapper;
+import org.csu.mypetstore.mapper.ProductMapper;
 import org.csu.mypetstore.service.CartService;
 import org.csu.mypetstore.session.LoginSession;
 import org.csu.mypetstore.session.LoginUser;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,6 +44,15 @@ class OrderControllerTest {
     private CartItemMapper cartItemMapper;
     @Autowired
     private CartService cartService;
+    @Autowired
+    private ProductMapper productMapper;
+
+    @BeforeEach
+    void prepareCatalog() {
+        setStock(21L, 100);
+        setStock(22L, 100);
+        setStatus(30L, "DRAFT");
+    }
 
     @Test
     void checkoutRequiresLogin() throws Exception {
@@ -66,6 +78,8 @@ class OrderControllerTest {
 
     @Test
     void blockedCartRedirectsBackToCart() throws Exception {
+        prepareBlockedCart();
+
         mockMvc.perform(get("/checkout").session(sessionFor(ALICE)))
                .andExpect(status().is3xxRedirection())
                .andExpect(redirectedUrl("/cart"))
@@ -74,7 +88,8 @@ class OrderControllerTest {
 
     @Test
     void blockedCartReturnsErrorToCheckout() throws Exception {
-        // alice 的种子里有下架商品，直接下单应被打回
+        prepareBlockedCart();
+
         mockMvc.perform(post("/orders")
                                 .session(sessionFor(ALICE))
                                 .param("receiverName", "林同学")
@@ -102,16 +117,32 @@ class OrderControllerTest {
     }
 
     @Test
+    void payRequiresLogin() throws Exception {
+        mockMvc.perform(post("/orders/1/pay"))
+               .andExpect(status().is3xxRedirection())
+               .andExpect(redirectedUrl("/signon?returnUrl=%2Forders%2F1%2Fpay"));
+    }
+
+    @Test
+    void payThenCancelIsRejected() throws Exception {
+        clearCart(ALICE);
+        cartService.addItem(ALICE, 21L, 1);
+        Long orderId = placeOrder(ALICE);
+
+        mockMvc.perform(post("/orders/" + orderId + "/pay").session(sessionFor(ALICE)))
+               .andExpect(redirectedUrl("/orders/" + orderId))
+               .andExpect(flash().attribute("notice", containsString("支付成功")));
+
+        mockMvc.perform(post("/orders/" + orderId + "/cancel").session(sessionFor(ALICE)))
+               .andExpect(redirectedUrl("/orders/" + orderId))
+               .andExpect(flash().attribute("error", containsString("已支付")));
+    }
+
+    @Test
     void orderDetailIsOnlyVisibleToOwner() throws Exception {
         clearCart(ALICE);
         cartService.addItem(ALICE, 21L, 1);
-        String location = mockMvc.perform(post("/orders")
-                                                   .session(sessionFor(ALICE))
-                                                   .param("receiverName", "林同学")
-                                                   .param("receiverPhone", "13800001111")
-                                                   .param("receiverAddress", "湖南省长沙市岳麓区某路 1 号"))
-                                 .andReturn().getResponse().getRedirectedUrl();
-        Long orderId = Long.valueOf(location.substring(location.lastIndexOf('/') + 1));
+        Long orderId = placeOrder(ALICE);
 
         mockMvc.perform(get("/orders/" + orderId).session(sessionFor(ALICE)))
                .andExpect(status().isOk())
@@ -121,11 +152,51 @@ class OrderControllerTest {
                .andExpect(status().isNotFound());
     }
 
+    /** 车上放一件下架商品，构造"不可结算"的状态。 */
+    private void prepareBlockedCart() {
+        clearCart(ALICE);
+        addDirectly(ALICE, 30L, 1);
+    }
+
+    private void addDirectly(Long userId, Long productId, int quantity) {
+        CartItem item = new CartItem();
+        item.setUserId(userId);
+        item.setProductId(productId);
+        item.setQuantity(quantity);
+        item.setVersion(0L);
+        cartItemMapper.insert(item);
+    }
+
+    /** 走一遍真实下单，从 Location 里取出订单 id。 */
+    private Long placeOrder(Long userId) throws Exception {
+        String location = mockMvc.perform(post("/orders")
+                                                   .session(sessionFor(userId))
+                                                   .param("receiverName", "林同学")
+                                                   .param("receiverPhone", "13800001111")
+                                                   .param("receiverAddress", "湖南省长沙市岳麓区某路 1 号"))
+                                 .andReturn().getResponse().getRedirectedUrl();
+        return Long.valueOf(location.substring(location.lastIndexOf('/') + 1));
+    }
+
     private MockHttpSession sessionFor(Long userId) {
         String username = userId.equals(ALICE) ? "alice" : "bob";
         MockHttpSession session = new MockHttpSession();
         session.setAttribute(LoginSession.KEY, new LoginUser(userId, username, "林同学", "CUSTOMER"));
         return session;
+    }
+
+
+    /** 手动把商品调成已知状态：谁在页面上买空了货，测试也不受影响（事务结束自动回滚）。 */
+    private void setStock(Long productId, int stock) {
+        productMapper.update(null, Wrappers.<Product>lambdaUpdate()
+                .set(Product::getStock, stock)
+                .eq(Product::getId, productId));
+    }
+
+    private void setStatus(Long productId, String status) {
+        productMapper.update(null, Wrappers.<Product>lambdaUpdate()
+                .set(Product::getStatus, status)
+                .eq(Product::getId, productId));
     }
 
     private void clearCart(Long userId) {

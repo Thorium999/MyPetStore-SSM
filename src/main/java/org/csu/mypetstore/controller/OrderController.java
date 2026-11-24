@@ -6,6 +6,7 @@ import org.csu.mypetstore.dto.Receiver;
 import org.csu.mypetstore.entity.SalesOrder;
 import org.csu.mypetstore.entity.User;
 import org.csu.mypetstore.service.CartService;
+import org.csu.mypetstore.service.OrderAction;
 import org.csu.mypetstore.service.OrderException;
 import org.csu.mypetstore.service.OrderService;
 import org.csu.mypetstore.service.UserService;
@@ -76,6 +77,22 @@ public class OrderController {
             redirect.addFlashAttribute("error", e.getMessage());
             return "redirect:/checkout";
         }
+    }
+
+    @PostMapping("/orders/{id}/pay")
+    public String pay(@PathVariable Long id, HttpSession session, RedirectAttributes redirect) {
+        LoginUser user = LoginSession.get(session);
+        OrderAction action = orderService.pay(user.id(), id);
+        redirect.addFlashAttribute(action.success() ? "notice" : "error", action.message());
+        return "redirect:/orders/" + id;
+    }
+
+    @PostMapping("/orders/{id}/cancel")
+    public String cancel(@PathVariable Long id, HttpSession session, RedirectAttributes redirect) {
+        LoginUser user = LoginSession.get(session);
+        OrderAction action = orderService.cancel(user.id(), id);
+        redirect.addFlashAttribute(action.success() ? "notice" : "error", action.message());
+        return "redirect:/orders/" + id;
     }
 
     @GetMapping("/orders")

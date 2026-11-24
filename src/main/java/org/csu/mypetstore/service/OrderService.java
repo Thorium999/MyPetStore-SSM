@@ -147,6 +147,62 @@ public Long placeOrder(Long userId, Receiver receiver) {
     return order.getId();
 }
 
+/**
+ * 模拟支付。用条件 UPDATE 把"只有待付款才能付"交给数据库判断：
+ * affected == 0 说明状态已经变了（重复提交、被别人取消），这时候去查原因再给提示。
+ */
+@Transactional
+public OrderAction pay(Long userId, Long orderId) {
+    SalesOrder order = findOwnOrder(userId, orderId).orElse(null);
+    if (order == null) {
+        return OrderAction.fail("订单不存在");
+    }
+
+    int affected = orderMapper.update(null, Wrappers.<SalesOrder>lambdaUpdate()
+            .set(SalesOrder::getStatus, STATUS_PAID)
+            .set(SalesOrder::getPaymentMethod, "MOCK")
+            .set(SalesOrder::getPaymentNo, nextPaymentNo())
+            .set(SalesOrder::getPaidAt, LocalDateTime.now())
+            .eq(SalesOrder::getId, orderId)
+            .eq(SalesOrder::getUserId, userId)
+            .eq(SalesOrder::getStatus, STATUS_PENDING_PAYMENT));
+
+    if (affected == 0) {
+        return OrderAction.fail(describeNotPayable(order.getStatus()));
+    }
+    return OrderAction.ok("支付成功，订单已付款");
+}
+
+/**
+ * 取消订单：只有待付款能取消，取消时把库存按明细加回去。
+ * 状态变更与库存回补在同一个事务里，任何一步失败都不会留下"取消了但库存没退"的脏数据。
+ */
+@Transactional
+public OrderAction cancel(Long userId, Long orderId) {
+    SalesOrder order = findOwnOrder(userId, orderId).orElse(null);
+    if (order == null) {
+        return OrderAction.fail("订单不存在");
+    }
+
+    int affected = orderMapper.update(null, Wrappers.<SalesOrder>lambdaUpdate()
+            .set(SalesOrder::getStatus, STATUS_CANCELLED)
+            .set(SalesOrder::getCancelledAt, LocalDateTime.now())
+            .eq(SalesOrder::getId, orderId)
+            .eq(SalesOrder::getUserId, userId)
+            .eq(SalesOrder::getStatus, STATUS_PENDING_PAYMENT));
+
+    if (affected == 0) {
+        return OrderAction.fail(describeNotCancellable(order.getStatus()));
+    }
+
+    for (SalesOrderItem item : findOrderItems(orderId)) {
+        productMapper.update(null, Wrappers.<Product>lambdaUpdate()
+                .setSql("stock = stock + " + item.getQuantity())
+                .eq(Product::getId, item.getProductId()));
+    }
+    return OrderAction.ok("订单已取消，库存已退回");
+}
+
 public List<OrderSummary> listOrders(Long userId) {
     return orderMapper.selectList(Wrappers.<SalesOrder>lambdaQuery()
                                           .eq(SalesOrder::getUserId, userId)
@@ -156,6 +212,28 @@ public List<OrderSummary> listOrders(Long userId) {
                        .map(order -> new OrderSummary(order.getId(), order.getOrderNo(), order.getStatus(),
                                statusLabel(order.getStatus()), order.getTotalAmount(), order.getCreatedAt()))
                        .toList();
+}
+
+private String describeNotPayable(String status) {
+    return switch (status) {
+        case STATUS_PAID, STATUS_SHIPPED, STATUS_COMPLETED -> "该订单已支付，无需重复支付";
+        case STATUS_CANCELLED -> "订单已取消，无法支付";
+        default -> "当前状态不可支付";
+    };
+}
+
+private String describeNotCancellable(String status) {
+    return switch (status) {
+        case STATUS_CANCELLED -> "订单已取消";
+        case STATUS_PAID, STATUS_SHIPPED, STATUS_COMPLETED -> "订单已支付，不能取消";
+        default -> "当前状态不可取消";
+    };
+}
+
+private String nextPaymentNo() {
+    String stamp = LocalDateTime.now().format(ORDER_NO_TIME);
+    int suffix = ThreadLocalRandom.current().nextInt(1000, 10000);
+    return "PAY" + stamp + suffix;
 }
 
 /** 只能看自己的订单：user_id 一起作为查询条件，查不到就当作不存在。 */

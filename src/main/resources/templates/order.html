@@ -23,6 +23,7 @@
         </nav>
 
         <p class="notice" th:if="${notice}" th:text="${notice}">订单已创建</p>
+        <p class="alert" th:if="${error}" th:text="${error}">操作未完成</p>
 
         <div class="content__head">
             <h1>
@@ -86,7 +87,23 @@
             </div>
         </section>
 
-        <p class="hint">支付与取消功能在下一步实现，当前订单为待付款状态。</p>
+        <div class="order-actions" th:if="${order.status == 'PENDING_PAYMENT'}">
+            <form method="post" th:action="@{/orders/{id}/pay(id=${order.id})}">
+                <button class="btn" type="submit">模拟支付</button>
+            </form>
+            <form method="post" th:action="@{/orders/{id}/cancel(id=${order.id})}"
+                  onsubmit="return confirm('取消后库存会退回，确定取消这单吗？');">
+                <button class="btn btn--ghost" type="submit">取消订单</button>
+            </form>
+        </div>
+
+        <p class="hint" th:if="${order.status == 'PAID'}">已支付，等待发货。</p>
+        <p class="hint" th:if="${order.status == 'SHIPPED'}">已发货，请注意查收。</p>
+        <p class="hint" th:if="${order.status == 'COMPLETED'}">订单已完成。</p>
+        <p class="hint" th:if="${order.status == 'CANCELLED'}">订单已取消，库存已退回。</p>
+
+        <p class="hint" th:if="${order.paymentNo != null}"
+           th:text="'支付单号 ' + ${order.paymentNo} + '（模拟支付）'">支付单号</p>
 
     </div>
 </main>
