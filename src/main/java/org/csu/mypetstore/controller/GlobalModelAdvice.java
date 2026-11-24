@@ -2,6 +2,7 @@ package org.csu.mypetstore.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.csu.mypetstore.security.CsrfToken;
 import org.csu.mypetstore.service.CartService;
 import org.csu.mypetstore.session.LoginSession;
 import org.csu.mypetstore.session.LoginUser;
@@ -32,5 +33,11 @@ public class GlobalModelAdvice {
     public int cartCount(HttpSession session) {
         LoginUser user = LoginSession.get(session);
         return user == null ? 0 : cartService.countItems(user.id());
+    }
+
+    /** 所有 POST 表单都要带上它；没有就当场生成并放进 Session。 */
+    @ModelAttribute("csrfToken")
+    public String csrfToken(HttpSession session) {
+        return CsrfToken.current(session);
     }
 }

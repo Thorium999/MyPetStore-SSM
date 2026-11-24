@@ -89,10 +89,12 @@
 
         <div class="order-actions" th:if="${order.status == 'PENDING_PAYMENT'}">
             <form method="post" th:action="@{/orders/{id}/pay(id=${order.id})}">
+                <input type="hidden" name="_csrf" th:value="${csrfToken}"/>
                 <button class="btn" type="submit">模拟支付</button>
             </form>
             <form method="post" th:action="@{/orders/{id}/cancel(id=${order.id})}"
                   onsubmit="return confirm('取消后库存会退回，确定取消这单吗？');">
+                <input type="hidden" name="_csrf" th:value="${csrfToken}"/>
                 <button class="btn btn--ghost" type="submit">取消订单</button>
             </form>
         </div>

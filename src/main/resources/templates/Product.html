@@ -68,6 +68,7 @@
                 </p>
 
                 <form class="buy" method="post" th:action="@{/cart}">
+                    <input type="hidden" name="_csrf" th:value="${csrfToken}"/>
                     <input type="hidden" name="productId" th:value="${product.id}"/>
                     <label class="buy__qty" for="productQuantity">数量</label>
                     <div th:replace="~{fragments/layout :: qtyStepper(${maxQuantity}, 1, ${soldOut}, 'productQuantity')}"></div>

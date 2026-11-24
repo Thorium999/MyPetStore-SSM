@@ -1,5 +1,6 @@
 package org.csu.mypetstore.controller;
 
+import org.csu.mypetstore.security.CsrfToken;
 import org.csu.mypetstore.session.LoginSession;
 import org.csu.mypetstore.session.LoginUser;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 class AccountControllerTest {
+
+    private static final String CSRF = "test-token";
+
 
     private static final String PASSWORD = "PetStore123!";
 
@@ -76,7 +80,7 @@ class AccountControllerTest {
                .andExpect(status().isOk())
                .andExpect(model().attributeDoesNotExist("returnUrl"));
 
-        mockMvc.perform(post("/signon")
+        mockMvc.perform(post("/signon").param("_csrf", CSRF).session(tokenSession())
                                 .param("username", "alice")
                                 .param("password", PASSWORD)
                                 .param("returnUrl", "/signout"))
@@ -92,10 +96,11 @@ class AccountControllerTest {
     @Test
     void signoutInvalidatesSession() throws Exception {
         MockHttpSession session = new MockHttpSession();
+        session.setAttribute(CsrfToken.SESSION_KEY, CSRF);
         session.setAttribute(LoginSession.KEY,
                 new LoginUser(1L, "alice", "林同学", "CUSTOMER"));
 
-        mockMvc.perform(post("/signout").session(session))
+        mockMvc.perform(post("/signout").param("_csrf", CSRF).session(session))
                .andExpect(status().is3xxRedirection())
                .andExpect(redirectedUrl("/main"));
 
@@ -104,7 +109,7 @@ class AccountControllerTest {
 
     @Test
     void successfulLoginWritesSessionAndRedirectsHome() throws Exception {
-        MvcResult result = mockMvc.perform(post("/signon")
+        MvcResult result = mockMvc.perform(post("/signon").param("_csrf", CSRF).session(tokenSession())
                                                    .param("username", "alice")
                                                    .param("password", PASSWORD))
                                   .andExpect(status().is3xxRedirection())
@@ -119,7 +124,7 @@ class AccountControllerTest {
 
     @Test
     void successfulLoginRespectsInternalReturnUrl() throws Exception {
-        mockMvc.perform(post("/signon")
+        mockMvc.perform(post("/signon").param("_csrf", CSRF).session(tokenSession())
                                 .param("username", "alice")
                                 .param("password", PASSWORD)
                                 .param("returnUrl", "/category?categoryId=1"))
@@ -128,20 +133,20 @@ class AccountControllerTest {
 
     @Test
     void refusesOffsiteReturnUrl() throws Exception {
-        mockMvc.perform(post("/signon")
+        mockMvc.perform(post("/signon").param("_csrf", CSRF).session(tokenSession())
                                 .param("username", "alice")
                                 .param("password", PASSWORD)
                                 .param("returnUrl", "//evil.example.com"))
                .andExpect(redirectedUrl("/main"));
 
-        mockMvc.perform(post("/signon")
+        mockMvc.perform(post("/signon").param("_csrf", CSRF).session(tokenSession())
                                 .param("username", "alice")
                                 .param("password", PASSWORD)
                                 .param("returnUrl", "https://evil.example.com"))
                .andExpect(redirectedUrl("/main"));
 
         // 浏览器会把 /\host 当成 //host，必须一并挡掉
-        mockMvc.perform(post("/signon")
+        mockMvc.perform(post("/signon").param("_csrf", CSRF).session(tokenSession())
                                 .param("username", "alice")
                                 .param("password", PASSWORD)
                                 .param("returnUrl", "/\\evil.example.com"))
@@ -150,7 +155,7 @@ class AccountControllerTest {
 
     @Test
     void wrongPasswordShowsGenericError() throws Exception {
-        mockMvc.perform(post("/signon")
+        mockMvc.perform(post("/signon").param("_csrf", CSRF).session(tokenSession())
                                 .param("username", "alice")
                                 .param("password", "wrong"))
                .andExpect(status().isOk())
@@ -160,10 +165,17 @@ class AccountControllerTest {
 
     @Test
     void disabledAccountShowsDisabledMessage() throws Exception {
-        mockMvc.perform(post("/signon")
+        mockMvc.perform(post("/signon").param("_csrf", CSRF).session(tokenSession())
                                 .param("username", "disabled")
                                 .param("password", PASSWORD))
                .andExpect(status().isOk())
                .andExpect(model().attribute("error", "该账号已被禁用，请联系管理员"));
+    }
+
+    /** 只带 CSRF 令牌、未登录的会话，用来验证"未登录"这条分支。 */
+    private MockHttpSession tokenSession() {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(CsrfToken.SESSION_KEY, CSRF);
+        return session;
     }
 }

@@ -63,6 +63,9 @@ src/main/resources/
 
 ## 说明
 
+- 所有写操作（POST）都要求带 CSRF 令牌：表单里有 `<input type="hidden" name="_csrf">`，
+  服务端在 `CsrfInterceptor` 里与 Session 中的值做常量时间比较，不匹配直接 403。
+  没引 Spring Security，这一小块是手写的（`security/CsrfToken`）；新增 POST 表单时别忘了带这个隐藏域。
 - 商品图片为程序生成的示例占位图（`static/images/`），未使用课程提供的原型素材；
   换真图时保持 `images/products/<SKU>/<n>.jpg` 等原路径即可，数据库无需改动。
 - 数据库只在首次导入和显式重置时初始化，日常启动不会建表或清库（`spring.sql.init.mode: never`）。

@@ -28,6 +28,7 @@
                th:href="@{/signon(returnUrl=${currentPath})}">登录</a>
             <form class="app-nav__logout" method="post" th:action="@{/signout}"
                   th:if="${session.loginUser != null}">
+                <input type="hidden" name="_csrf" th:value="${csrfToken}"/>
                 <button type="submit">退出</button>
             </form>
             <a class="cart" th:href="@{/cart}">购物车 <b th:text="${cartCount}">0</b></a>

@@ -19,6 +19,7 @@
             <p class="alert" th:if="${error}" th:text="${error}">用户名或密码错误</p>
 
             <form class="auth__form" method="post" th:action="@{/signon}">
+                <input type="hidden" name="_csrf" th:value="${csrfToken}"/>
                 <input type="hidden" name="returnUrl" th:if="${returnUrl}" th:value="${returnUrl}"/>
 
                 <label class="field">

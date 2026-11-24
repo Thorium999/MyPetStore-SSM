@@ -23,6 +23,7 @@
 
         <div class="checkout">
             <form class="checkout__form" method="post" th:action="@{/orders}">
+                <input type="hidden" name="_csrf" th:value="${csrfToken}"/>
                 <h2 class="checkout__title">收货信息</h2>
 
                 <label class="field">

@@ -3,6 +3,7 @@ package org.csu.mypetstore.controller;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.csu.mypetstore.entity.CartItem;
 import org.csu.mypetstore.mapper.CartItemMapper;
+import org.csu.mypetstore.security.CsrfToken;
 import org.csu.mypetstore.session.LoginSession;
 import org.csu.mypetstore.session.LoginUser;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class CartControllerTest {
 
+    private static final String CSRF = "test-token";
+
+
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -45,7 +49,7 @@ class CartControllerTest {
 
     @Test
     void addToCartWhileLoggedOutRemembersIntent() throws Exception {
-        MvcResult result = mockMvc.perform(post("/cart")
+        MvcResult result = mockMvc.perform(post("/cart").param("_csrf", CSRF).session(tokenSession())
                                                    .param("productId", "22")
                                                    .param("quantity", "2"))
                                   .andExpect(status().is3xxRedirection())
@@ -72,7 +76,7 @@ class CartControllerTest {
 
     @Test
     void loggedInAddRedirectsToCartWithNotice() throws Exception {
-        mockMvc.perform(post("/cart")
+        mockMvc.perform(post("/cart").param("_csrf", CSRF)
                                 .session(aliceSession())
                                 .param("productId", "22")
                                 .param("quantity", "1"))
@@ -83,10 +87,10 @@ class CartControllerTest {
 
     @Test
     void updateAndDeleteRequireLogin() throws Exception {
-        mockMvc.perform(post("/cart/1/quantity").param("quantity", "2"))
+        mockMvc.perform(post("/cart/1/quantity").param("_csrf", CSRF).session(tokenSession()).param("quantity", "2"))
                .andExpect(redirectedUrl("/signon?returnUrl=%2Fcart%2F1%2Fquantity"));
 
-        mockMvc.perform(post("/cart/1/delete"))
+        mockMvc.perform(post("/cart/1/delete").param("_csrf", CSRF).session(tokenSession()))
                .andExpect(redirectedUrl("/signon?returnUrl=%2Fcart%2F1%2Fdelete"));
     }
 
@@ -105,7 +109,15 @@ class CartControllerTest {
 
     private MockHttpSession aliceSession() {
         MockHttpSession session = new MockHttpSession();
+        session.setAttribute(CsrfToken.SESSION_KEY, CSRF);
         session.setAttribute(LoginSession.KEY, new LoginUser(1L, "alice", "林同学", "CUSTOMER"));
+        return session;
+    }
+
+    /** 只带 CSRF 令牌、未登录的会话，用来验证"未登录"这条分支。 */
+    private MockHttpSession tokenSession() {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(CsrfToken.SESSION_KEY, CSRF);
         return session;
     }
 }
