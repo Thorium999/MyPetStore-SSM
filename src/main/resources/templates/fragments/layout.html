@@ -65,5 +65,21 @@
     </div>
 </article>
 
+<!--
+  数量步进器：详情页和购物车共用，行为由 /js/qty.js 统一负责
+  （只接受正整数、聚焦全选、± 夹在 1—max；表单带 data-autosubmit 时改动即提交）
+-->
+<div class="qty" th:fragment="qtyStepper(max, value, disabled, inputId)">
+    <button class="qty__step" type="button" data-step="-1"
+            th:disabled="${disabled}" aria-label="减少数量">−</button>
+    <input class="qty__input" type="number" name="quantity" step="1"
+           inputmode="numeric" autocomplete="off"
+           th:id="${inputId}"
+           th:value="${value}" min="1" th:max="${max}"
+           th:disabled="${disabled}" aria-label="购买数量"/>
+    <button class="qty__step" type="button" data-step="1"
+            th:disabled="${disabled}" aria-label="增加数量">+</button>
+</div>
+
 </body>
 </html>

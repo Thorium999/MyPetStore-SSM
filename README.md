@@ -47,8 +47,22 @@ src/main/resources/
 
 密码以 BCrypt 存储，校验用 `BCryptPasswordEncoder.matches()`。
 
+## 重置演示数据
+
+测试改乱了数据（加购、下单、删条目）想回到出厂状态时：
+
+```bash
+./mvnw spring-boot:run -Preset-db
+```
+
+`reset-db` profile 会附加 `--app.reset-db=true`，启动时依次执行
+`database/00-reset-demo.sql`（删七张表）和 `database/02-schema-with-demo.sql`（重建 + 灌种子），
+然后照常提供服务。IDEA 里也可以用：复制一份 Spring Boot 运行配置，在 *Program arguments* 加 `--app.reset-db=true`。
+
+**这是破坏性操作**：七张表会被删掉重建，自己加的测试数据不会保留。平时启动不加这个参数就完全不受影响。
+
 ## 说明
 
 - 商品图片为程序生成的示例占位图（`static/images/`），未使用课程提供的原型素材；
   换真图时保持 `images/products/<SKU>/<n>.jpg` 等原路径即可，数据库无需改动。
-- 数据库只初始化一次，应用启动不会建表或清库（`spring.sql.init.mode: never`）。
+- 数据库只在首次导入和显式重置时初始化，日常启动不会建表或清库（`spring.sql.init.mode: never`）。

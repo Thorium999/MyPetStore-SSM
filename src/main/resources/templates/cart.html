@@ -53,15 +53,11 @@
                     <small>¥</small><span th:text="${#numbers.formatDecimal(line.price, 1, 2)}">0.00</span>
                 </div>
 
-                <form class="cart__qty" method="post"
+                <form class="cart__qty" method="post" data-autosubmit
                       th:action="@{/cart/{id}/quantity(id=${line.itemId})}">
-                    <label class="sr-only" th:for="'qty-' + ${line.itemId}"
+                    <label class="sr-only" th:for="${'qty-' + line.itemId}"
                            th:text="|${line.name} 的数量|">数量</label>
-                    <input class="qty__input" type="number" name="quantity" step="1" inputmode="numeric"
-                           th:id="'qty-' + ${line.itemId}"
-                           th:value="${line.quantity}" min="1"
-                           th:max="${line.stock > 0 ? line.stock : 1}"/>
-                    <button class="btn btn--sm" type="submit">更新</button>
+                    <div th:replace="~{fragments/layout :: qtyStepper(${line.stock > 0 ? line.stock : 1}, ${line.quantity}, false, ${'qty-' + line.itemId})}"></div>
                 </form>
 
                 <div class="cart__subtotal">
@@ -90,6 +86,8 @@
 </main>
 
 <div th:replace="~{fragments/layout :: siteFooter}"></div>
+
+<script th:src="@{/js/qty.js}"></script>
 
 </body>
 </html>

@@ -131,4 +131,25 @@
         </plugins>
     </build>
 
+    <profiles>
+        <!-- 重置演示数据的运行入口：mvnw spring-boot:run -Preset-db
+             启动时先删表再按 02-schema-with-demo.sql 重建，然后正常提供服务 -->
+        <profile>
+            <id>reset-db</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <configuration>
+                            <arguments>
+                                <argument>--app.reset-db=true</argument>
+                            </arguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

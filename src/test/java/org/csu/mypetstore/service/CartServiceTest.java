@@ -90,13 +90,26 @@ class CartServiceTest {
     }
 
     @Test
-    void updateQuantityClampsAndTellsUser() {
+    void updateQuantityClampsToStock() {
         cartService.addItem(BOB, FREE_PRODUCT, 2);
         CartLine line = findLine(BOB, FREE_PRODUCT);
 
-        // 要 200 件，超过库存（73）也超过 99 的上限，应被夹到库存值并如实提示
-        assertThat(cartService.updateQuantity(BOB, line.itemId(), 200)).contains("库存只有");
+        // 商品 22 库存 73，要 200 件应被夹到库存值
+        assertThat(cartService.updateQuantity(BOB, line.itemId(), 200)).contains("库存只有 73 件");
         assertThat(findLine(BOB, FREE_PRODUCT).quantity()).isEqualTo(line.stock());
+    }
+
+    @Test
+    void updateQuantityClampsToPerOrderLimitWhenStockIsLarger() {
+        // 商品 28 库存 119：上限是单次 99，不该说成"库存只有 99 件"
+        cartService.addItem(BOB, 28L, 1);
+        CartLine line = findLine(BOB, 28L);
+
+        String message = cartService.updateQuantity(BOB, line.itemId(), 150);
+
+        assertThat(message).contains("单次最多购买 99 件");
+        assertThat(message).doesNotContain("库存只有");
+        assertThat(findLine(BOB, 28L).quantity()).isEqualTo(CartService.MAX_QUANTITY);
     }
 
     @Test

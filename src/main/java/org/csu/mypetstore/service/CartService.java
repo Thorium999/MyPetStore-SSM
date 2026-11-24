@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 @Service
 public class CartService {
 
-/** 与 cart_item 的 CHECK 约束保持一致 */
+/** 与 cart_item 的 CHECK 约束一致；单次上限与详情页共用同一个常量，避免两处各写 99 */
 public static final int MIN_QUANTITY = 1;
-public static final int MAX_QUANTITY = 99;
+public static final int MAX_QUANTITY = ProductService.MAX_QUANTITY;
 
 private final CartItemMapper cartItemMapper;
 private final ProductMapper productMapper;
@@ -118,7 +118,7 @@ public String addItem(Long userId, Long productId, int quantity) {
 
     int merged = Math.min(existing.getQuantity() + want, limit);
     if (merged == existing.getQuantity()) {
-        return "购物车里已有 " + merged + " 件，达到可购上限";
+        return "已达到可购上限（" + limit + " 件）";
     }
     existing.setQuantity(merged);
     cartItemMapper.updateById(existing);
@@ -142,7 +142,13 @@ public String updateQuantity(Long userId, Long itemId, int quantity) {
     item.setQuantity(applied);
     cartItemMapper.updateById(item);
 
-    return applied == quantity ? "数量已更新" : "库存只有 " + limit + " 件，数量已调整";
+    if (applied == quantity) {
+        return "数量已更新";
+    }
+    // 两种上限要分开说：库存卡住说库存，单次购买上限卡住说 99
+    return limit == MAX_QUANTITY
+           ? "单次最多购买 " + MAX_QUANTITY + " 件，数量已调整为 " + applied
+           : "库存只有 " + stock + " 件，数量已调整为 " + applied;
 }
 
 /** 删除一行。只有本人能删（user_id 一起作为条件）。 */

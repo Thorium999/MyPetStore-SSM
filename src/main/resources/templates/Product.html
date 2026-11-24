@@ -69,17 +69,8 @@
 
                 <form class="buy" method="post" th:action="@{/cart}">
                     <input type="hidden" name="productId" th:value="${product.id}"/>
-                    <label class="buy__qty" for="quantity">数量</label>
-                    <div class="qty">
-                        <button class="qty__step" type="button" data-step="-1"
-                                th:disabled="${soldOut}" aria-label="减少数量">−</button>
-                        <input class="qty__input" id="quantity" type="number" name="quantity"
-                               value="1" min="1" th:max="${maxQuantity}" step="1"
-                               inputmode="numeric" autocomplete="off"
-                               th:disabled="${soldOut}" aria-label="购买数量"/>
-                        <button class="qty__step" type="button" data-step="1"
-                                th:disabled="${soldOut}" aria-label="增加数量">+</button>
-                    </div>
+                    <label class="buy__qty" for="productQuantity">数量</label>
+                    <div th:replace="~{fragments/layout :: qtyStepper(${maxQuantity}, 1, ${soldOut}, 'productQuantity')}"></div>
                     <button class="btn" type="submit" th:disabled="${soldOut}">加入购物车</button>
                 </form>
                 <p class="hint" th:if="${soldOut}">该商品暂时无货</p>
@@ -105,59 +96,9 @@
             document.getElementById('mainImage').src = button.dataset.src;
         });
     });
-
-    // 数量步进：只接受正整数；点 ± 调整；失焦 / 提交前夹回 1—max
-    (function () {
-        var input = document.getElementById('quantity');
-        if (!input) {
-            return;
-        }
-        var min = Number(input.min) || 1;
-        var max = Number(input.max) || min;
-
-        // 当前值统一取整，13.5 这类脏值进不来
-        var current = function () {
-            var value = Math.trunc(Number(input.value));
-            return isNaN(value) ? min : value;
-        };
-        var clamp = function (value) {
-            return Math.min(Math.max(value, min), max);
-        };
-
-        document.querySelectorAll('.qty__step').forEach(function (button) {
-            button.addEventListener('click', function () {
-                input.value = clamp(current() + Number(button.dataset.step));
-            });
-        });
-
-        // 聚焦全选，直接输入就能覆盖原来的 1
-        input.addEventListener('focus', function () {
-            input.select();
-        });
-
-        // 拦掉小数点、正负号、科学计数法的 e
-        input.addEventListener('keydown', function (event) {
-            if (['.', ',', 'e', 'E', '+', '-'].indexOf(event.key) >= 0) {
-                event.preventDefault();
-            }
-        });
-
-        // 粘贴进来的小数也截断
-        input.addEventListener('input', function () {
-            if (input.value.indexOf('.') >= 0) {
-                input.value = String(Math.trunc(Number(input.value)) || min);
-            }
-        });
-
-        var normalize = function () {
-            input.value = clamp(current());
-        };
-        input.addEventListener('change', normalize);
-        if (input.form) {
-            input.form.addEventListener('submit', normalize);
-        }
-    })();
 </script>
+
+<script th:src="@{/js/qty.js}"></script>
 
 </body>
 </html>
